@@ -1,0 +1,26 @@
+RewriteEngine On
+
+# Redirect 'dashboard' to 'home.php'
+RewriteRule ^dashboard$ home.php [L]
+
+# Redirect all traffic to 'index.php' if the file or directory does not exist
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
+
+# Deny access to sensitive files
+<FilesMatch "\.(env|json|lock|txt|xlsx|php~|scss)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Enable CORS for APIs
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type"
+</IfModule>
+
+# Set custom error pages
+ErrorDocument 404 /404.php
+ErrorDocument 500 /500.php
