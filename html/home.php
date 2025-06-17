@@ -7,6 +7,7 @@ require('session.php');
 include 'calendar.php';
 include 'connection.php';
 
+
 $timezone = new DateTimeZone("Asia/Kolkata" );
     $date = new DateTime();
     $date->setTimezone($timezone );
@@ -168,14 +169,6 @@ foreach ($date_counts as $date => $count) {
     // Add the event with a clickable link
     $calendar->add_event($event_text, $date, 1, 'green', $url);
 }
-
-
-
-
-
-
-
-
 
 
 
@@ -494,20 +487,6 @@ if (empty($psales)) {
           <!-- Content wrapper -->
           <div class="content-wrapper">
             <!-- Content -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             <div class="container-xxl flex-grow-1 container-p-y">
 
             <div class="navbar-nav align-items-center">
@@ -716,22 +695,20 @@ if (mysqli_num_rows($result) > 0) {
 
 ?>
 
-<div style="background-color: purple; color: white; padding: 20px; border-radius: 10px;">
-    <!-- Monthly Summary Heading -->
-    <h2 style="text-align: center; margin-bottom: 20px;"></h2>
+<div class="monthly-summary-container">
+    <h2 class="monthly-summary-title">Monthly Summary</h2>
     
-    <!-- Summary Items -->
-    <div style="display: flex; justify-content: space-around; align-items: center;">
-        <?php foreach ($categories as $category) { ?>
-            <div style="text-align: center; width: 20%;">
-                <div style="font-size: 40px;"><?php echo $category['icon']; ?></div>
-                <div style="font-size: 24px; font-weight: bold;">MonthlySummary : ₹<?php echo number_format($category['actual'], 2); ?></div>
-                <div style="font-size: 18px; margin-top: 5px;"><?php echo $category['title']; ?>
-                
+    <div class="summary-scroll-container">
+        <div class="summary-items-container">
+            <?php foreach ($categories as $category) { ?>
+                <div class="summary-item">
+                    <span class="summary-item-icon"><?php echo $category['icon']; ?></span>
+                    <div class="summary-item-title"><?php echo htmlspecialchars($category['title']); ?></div>
+                    <div class="summary-item-actual">Actual: <span class="amount-highlight">₹<?php echo number_format($category['actual'], 2); ?></span></div>
+                    <div class="summary-item-forecast">Forecast: ₹<?php echo number_format($category['forecast'], 2); ?></div>
                 </div>
-                <div style="margin-top: 10px; font-size: 16px;">Forecast: ₹<?php echo number_format($category['forecast'], 2); ?></div>
-            </div>
-        <?php } ?>
+            <?php } ?>
+        </div>
     </div>
 </div>
             

@@ -157,7 +157,7 @@ $head = mysqli_real_escape_string($conn, $_POST['head_id']);
 
           
               <!-- Bootstrap Table with Header - Dark -->
-  <div class="card">
+    <div class="card">
                 <h5 class="card-header">Head</h5>
                 <div class="table-responsive text-nowrap">
                   <table class="table">
@@ -238,8 +238,8 @@ $head = mysqli_real_escape_string($conn, $_POST['head_id']);
           <!-- Content wrapper -->
           <div class="content-wrapper">
             <!-- Content -->
-  <!-- Bootstrap Table with Header - Dark -->
-  <div class="card">
+    <!-- Bootstrap Table with Header - Dark -->
+    <div class="card">
                 <h5 class="card-header">Category</h5>
                 <div class="table-responsive text-nowrap">
                   <table class="table">
