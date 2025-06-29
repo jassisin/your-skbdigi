@@ -1,252 +1,330 @@
 <?php
 require('session.php');
-
 include('connection.php');
+
+// Set username
 if(isset($_SESSION['main_admin'])){
-  $username=$_SESSION['main_admin'];
+    $username = $_SESSION['main_admin'];
+} else {
+    $username = 'Guest';
 }
-if(isset($_GET['id'])&&($_GET['id']!=''))
-{
-  $id=$_GET['id'];
-  $sql2="update admin_log set ac_tive='1' where id='$id'";
-  $res2=mysqli_query($conn,$sql2);
-  header("Location: admin-details.php");
- echo '<script> window.location.href = "admin-details.php"; </script>';
+
+
+// Fetch data from admin_log table
+$query = "SELECT * FROM admin_log WHERE ac_tive = 1 ORDER BY Name DESC";
+$result = mysqli_query($conn, $query);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_id') {
+    $id = mysqli_real_escape_string($conn, $_POST['id']);
+    // Soft delete: set ac_tive = 1 for the user
+    $sql = "DELETE From admin_log  WHERE id = '$id'";
+    if (mysqli_query($conn, $sql)) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => mysqli_error($conn)]);
+    }
+    exit;
 }
+include('header_section.php');
 ?>
 <!DOCTYPE html>
-
-<html
-  lang="en"
-  class="light-style layout-menu-fixed layout-compact"
-  dir="ltr"
-  data-theme="theme-default"
-  data-assets-path="../assets/"
-  data-template="vertical-menu-template-free">
-  <head>
+<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Role Management</title>
 
-    <title>Admin Details</title>
-
-    <meta name="description" content="" />
-
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&ampdisplay=swap"
-      rel="stylesheet" />
-
-    <link rel="stylesheet" href="../assets/vendor/fonts/materialdesignicons.css" />
-
-    <!-- Menu waves for no-customizer fix -->
-    <link rel="stylesheet" href="../assets/vendor/libs/node-waves/node-waves.css" />
-
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="../assets/vendor/css/core.css" />
+    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" />
     <link rel="stylesheet" href="../assets/css/demo.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            color: #333;
+            min-height: 100vh;
+            margin: 0;
+        }
 
-    <!-- Page CSS -->
+        .container {
+            max-width: 1400px;
+            margin: auto;
+            padding: 20px;
+        }
 
-    <!-- Helpers -->
+        .section-header {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .section-subtitle {
+            color: #6b7280;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .user-table-container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+        }
+
+        .table-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f9fafb;
+        }
+
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .user-table th,
+        .user-table td {
+            padding: 16px 12px;
+            text-align: left;
+        }
+
+        .user-table th {
+            background: #4f46e5;
+            color: #fff;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .user-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .user-table td {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 14px;
+            min-width: 40px;
+            justify-content: center;
+        }
+
+        .role-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .role-admin {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .role-super-admin {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .role-moderator {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .header-content { flex-direction: column; align-items: stretch; }
+            .user-table th, .user-table td { padding: 8px; font-size: 12px; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+
     <script src="../assets/vendor/js/helpers.js"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../assets/js/config.js"></script>
-  </head>
+</head>
 
-  <body>
-    <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar">
-      <div class="layout-container">
-        <!-- Menu -->
-
-        <?php include("header.php"); ?>
-
-        <!-- / Menu -->
-
-        <!-- Layout container -->
-        <div class="layout-page">
-          <!-- Navbar -->
-
-          <nav
-            class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-            id="layout-navbar" style="background-color: <?php echo $page_heading_color; ?>;">
-            <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
-              <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
-                <i class="mdi mdi-menu mdi-24px"></i>
-              </a>
-            </div>
-
-            <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-              <!-- Search -->
-              <div class="navbar-nav align-items-center">
-                <div class="nav-item d-flex align-items-center">
-                  <i class="mdi mdi-magnify mdi-24px lh-0"></i>
-                  <input
-                    type="text"
-                    class="form-control border-0 shadow-none bg-body"
-                    placeholder="Search..."
-                    aria-label="Search..." />
-                </div>
-              </div>
-              <!-- /Search -->
-
-              <ul class="navbar-nav flex-row align-items-center ms-auto">
-                <!-- Place this tag where you want the button to render. -->
-                <li class="nav-item lh-1 me-3">
-                 <?=$username?>
-                </li>
-
-                <!-- User -->
-                <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                  <a
-                    class="nav-link dropdown-toggle hide-arrow p-0"
-                    href="javascript:void(0);"
-                    data-bs-toggle="dropdown">
-                    <div class="avatar avatar-online">
-                      <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+<body>
+    <div class="content-wrapper">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="section-header">
+                <div class="header-content">
+                    <div>
+                        <h1 class="section-title">Role Management</h1>
+                        <p class="section-subtitle">Manage admin accounts and permissions</p>
                     </div>
-                  </a>
-                  <ul class="dropdown-menu dropdown-menu-end mt-3 py-2">
-                   
-                    <li>
-                      <div class="dropdown-divider my-1"></div>
-                    </li>
-                    <li>
-                      <a class="dropdown-item" href="logout.php">
-                        <i class="mdi mdi-power me-1 mdi-20px"></i>
-                        <span class="align-middle">Log Out</span>
-                      </a>
-                    </li>
-                  </ul>
-                </li>
-                <!--/ User -->
-              </ul>
+                    <div class="header-actions">
+                        <button class="btn btn-primary" onclick="window.location.href='admin-edit.php'">
+                            <i class="fas fa-plus"></i> Add New User
+                        </button>
+                    </div>
+                </div>
             </div>
-          </nav>
 
-          <!-- / Navbar -->
-
-          <!-- Content wrapper -->
-          <div class="content-wrapper">
-           
-      
-         
-          <div class="card">
-                <h5 class="card-header">Table Basic</h5>
-                <a href="admin-edit.php">  <button class="btn btn-primary btn-lg" type="button" name="submit">Add New Admin</button></a>
-
-                <div class="table-responsive text-nowrap">
-                  <table class="table">
+            <!-- User List Table -->
+            <div class="user-table-container">
+                <table class="user-table">
                     <thead>
-                      <tr>
-                        <th>Id</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                        <th>Staff</th>
-                     
-                      </tr>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Edit</th>
+                            <th>Delete</th>
+                        </tr>
                     </thead>
-                    <tbody class="table-border-bottom-0">
+                      <tbody class="table-border-bottom-0">
                     <?php
                     if($username=='superadmin' ){
-                      $sql="select id,role,username,password from admin_log where ac_tive='0' ";
+                      $sql="select id, Name, role,username,Email from admin_log where ac_tive='0'";
 
                     }
                     elseif($username=='admin'||$username=='admin1'){
-                      $sql="select id,role,username,password from admin_log where ac_tive='0' and id NOT IN (8)";
+                      $sql="select id, Name, role,username,Email from admin_log where ac_tive='0' and id NOT IN (8)";
 
                     }
                     else{
-                      $sql="select id,role,username,password from admin_log where ac_tive='0' and id NOT IN (1,2,8)";
+                      $sql="select id, Name, role,username,Email from admin_log where ac_tive='0' and id NOT IN (1,2,8)";
                     }
                       $res=mysqli_query($conn,$sql);
                       if(mysqli_num_rows($res)>0)
-     {
-    while($row=mysqli_fetch_array($res))
-    { ?>     
+                    {
+                       while($row=mysqli_fetch_array($res))
+                      { ?>     
                       <tr>
-                       <td><?= $row['id']; ?></td>
-      <td><?= $row['username']; ?></td>
+                       <td><?= $row['Name']; ?></td>
+                       <td><?= $row['username']; ?></td>
    
-      <td><?= $row['password']; ?></td>
-      <td><?= $row['role']; ?></td>
-      <td><a href="admin-edit.php?id=<?=$row['id']?>">Edit</a></td>
-      <td><a href="admin-details.php?id=<?=$row['id']?>"onClick="return confirm('Are you sure you want to delete?')" >Delete</a></td>
+                       <td><?= $row['Email']; ?></td>
+                       <td><?= $row['role']; ?></td>
+                       <td>
+                            <a href="admin-edit.php?id=<?php echo $row[
+                                           "id"
+                                       ]; ?>" title="Edit">
+                                       <i class="mdi mdi-pencil" style="font-size:20px;color:#1976d2;"></i>
+                            </a>
+                        </td>
+                        <td>
+                         <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this patient?');" style="display:inline;">
+                          <input type="hidden" name="delete_id" value="<?php echo $row["id"]; ?>">
+                          <input type="hidden" name="action" value="delete_id">
+                          <button type="submit" name="delete" class="btn btn-link p-0" title="Delete">
+                                <i class="mdi mdi-trash-can" style="font-size:20px;color:#d32f2f;"></i>
+                         </button>
+                        </form>
+                        </td>
                         <?php 
                       }
                      }?>
                       </tr>
                    
                     </tbody>
-                  </table>
-                </div>
-              </div>
-            <!-- Footer -->
-            <footer class="content-footer footer bg-footer-theme">
-              <div class="container-xxl"style="background-color: <?php echo $footer_color; ?>;">
-                <div
-                  class="footer-container d-flex align-items-center justify-content-between py-3 flex-md-row flex-column">
-                  <div class="text-body mb-2 mb-md-0">
-                    ©
-                    <script>
-                      document.write(new Date().getFullYear());
-                    </script>
-                   
-                  </div>
-                  <div class="d-none d-lg-inline-block">
-                    <a href="" class="footer-link me-3" target="_blank">SBK Details</a>
-                    
-                  </div>
-                </div>
-              </div>
-            </footer>
-            <!-- / Footer -->
-
-            <div class="content-backdrop fade"></div>
-          </div>
-          <!-- Content wrapper -->
+                </table>
+            </div>
         </div>
-        <!-- / Layout page -->
-      </div>
-
-      <!-- Overlay -->
-      <div class="layout-overlay layout-menu-toggle"></div>
     </div>
-    <!-- / Layout wrapper -->
 
-    
+    <script>
+        function editUser(username) {
+            // Redirect to edit page with username parameter
+            window.location.href = 'admin-edit.php?username=' + encodeURIComponent(username);
+        }
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../assets/vendor/libs/popper/popper.js"></script>
-    <script src="../assets/vendor/js/bootstrap.js"></script>
-    <script src="../assets/vendor/libs/node-waves/node-waves.js"></script>
-    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../assets/vendor/js/menu.js"></script>
-
-    <!-- endbuild -->
-
-    <!-- Vendors JS -->
-
-    <!-- Main JS -->
-    <script src="../assets/js/main.js"></script>
-
-    <!-- Page JS -->
-
-    <!-- Place this tag in your head or just before your close body tag. -->
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-  </body>
+        function deleteUser(username) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                // Send AJAX request to delete user
+                fetch('', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=delete_user&username=' + encodeURIComponent(username)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload page to update table
+                    } else {
+                        alert('Error deleting user: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the user');
+                });
+            }
+        }
+    </script>
+</body>
 </html>
+
+<?php 
+// Close database connection
+if (isset($conn)) {
+    mysqli_close($conn);
+}
+include('footer_section.php'); 
+?>

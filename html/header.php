@@ -239,7 +239,7 @@ if (isset($_SESSION['role'])) {
   <div class="menu-inner-shadow"></div>
 
   <ul class="menu-inner py-1">
-    <?php if($role!='executive'){ ?>
+    <?php if($role!='executive') { ?>
     
     <!-- Token Management Section -->
     <li class="menu-item">
@@ -248,6 +248,12 @@ if (isset($_SESSION['role'])) {
         <div data-i18n="Layouts">Token Management</div>
       </a>
       <ul class="menu-sub collapse" id="tokenMenu">
+        <li class="menu-item">
+          <a href="tvDashbord.php" class="menu-link">
+            <i class="menu-icon tf-icons mdi mdi-desk"></i>
+            <div data-i18n="Without menu">TV Dashboard</div>
+          </a>
+        </li>
         <li class="menu-item">
           <a href="reception.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-desk"></i>
@@ -345,7 +351,7 @@ if (isset($_SESSION['role'])) {
       </a>
       <ul class="menu-sub collapse" id="roleMenu">
         <li class="menu-item">
-          <a href="admin-edit.php" class="menu-link">
+          <a href="admin-details.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-account-cog"></i>
             <div data-i18n="Without menu">Manage Role</div>
           </a>

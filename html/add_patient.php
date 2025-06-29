@@ -311,12 +311,14 @@ if (isset($_POST['submit'])) {
                    <div class="form-group">
                     <label for="status">Status:</label>
                     <select class="form-control" id="status" name="status" required>
-                       <option value="">Select Status</option>    
-                        <option value="NURSING">NURSING</option>
+                       <option value="">Select Status</option> 
+                       <option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>
+                       <option value="NURSING_VITAL">NURSING - VITAL</option>   
                         <option value="MEDICAL">MEDICAL</option>
                         <option value="DENTAL">DENTAL</option>
-                        <option value="RECEPTION 2">RECEPTION 2</option>
+                        <option value="NURSING_CARE">NURSING - CARE</option>
                         <option value="PHARMACY">PHARMACY</option>
+                        <option value="RECEPTION_BILL">RECEPTION - BILL</option>
                     </select>
                 </div>
                 

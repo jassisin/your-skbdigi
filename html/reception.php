@@ -895,13 +895,15 @@ function handleSearchOptionChange() {
         searchInputHtml = '<input type="text" id="searchInput" class="form-control" placeholder="Enter Name">';
     } else if (selectedOption === 'status') {
         searchInputHtml = '<select id="searchInput" class="form-select">' +
-                          '<option value="">Select Status</option>' +
-                          '<option value="NURSING">NURSING</option>' +
-                          '<option value="MEDICAL">MEDICAL</option>' +
-                          '<option value="DENTAL">DENTAL</option>' +
-                          '<option value="RECEPTION 2">RECEPTION 2</option>' +
-                          '<option value="PHARMACY">PHARMACY</option>' +
-                          '</select>';
+            '<option value="">Select Status</option>' +
+            '<option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>' +
+            '<option value="NURSING_VITAL">NURSING - VITAL</option>' +
+            '<option value="MEDICAL">MEDICAL</option>' +
+            '<option value="DENTAL">DENTAL</option>' +
+            '<option value="NURSING_CARE">NURSING - CARE</option>' +
+            '<option value="PHARMACY">PHARMACY</option>' + 
+            '<option value="RECEPTION_BILL">RECEPTION - BILL</option>' +
+            '</select>';
     }
 
     $('#searchInputWrapper').html(searchInputHtml);
