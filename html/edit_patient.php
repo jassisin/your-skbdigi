@@ -79,6 +79,7 @@ if (isset($_POST['submit'])) {
     $status = mysqli_real_escape_string($conn, $_POST['status']);
     $notes = mysqli_real_escape_string($conn, $_POST['notes']);
     $created_date = date('Y-m-d H:i:s');
+    $next_visit_date = mysqli_real_escape_string($conn, $_POST['next_visit_date']);
 
     // Generate PID
     $pid = '';
@@ -103,9 +104,10 @@ if (isset($_POST['submit'])) {
 
     // Insert into DB
     $sql = "INSERT INTO reception 
-        (name, nationality, phone, whatsapp, area, residence, camp_boss, hr_staff, hr_phone, company, refferal, gate_service_site, status, notes, PID, created_date)
-        VALUES
-        ('$name', '$nationality', '$phone', '$whatsapp', '$area', '$residence', '$camp_boss', '$hr_staff', '$hr_phone', '$company', '$refferal', '$gate_service_site', '$status', '$notes', '$pid', '$created_date')";
+    (name, nationality, phone, whatsapp, area, residence, camp_boss, hr_staff, hr_phone, company, refferal, gate_service_site, status, notes, PID, created_date, next_visit_date)
+    VALUES
+    ('$name', '$nationality', '$phone', '$whatsapp', '$area', '$residence', '$camp_boss', '$hr_staff', '$hr_phone', '$company', '$refferal', '$gate_service_site', '$status', '$notes', '$pid', '$created_date', '$next_visit_date')";
+
     if (mysqli_query($conn, $sql)) {
         echo "<script>alert('Patient added successfully!'); window.location='reception.php';</script>";
         exit;
@@ -309,6 +311,10 @@ if (isset($_POST['submit'])) {
         <div class="form-group mb-2">
             <label>Gate Service Site:</label>
             <input type="text" name="gate_service_site" class="form-control" value="<?php echo htmlspecialchars($row['gate_service_site']); ?>">
+        </div>
+        <div class="form-group mb-2">
+              <label>Next Visit Date:</label>
+             <input type="date" name="next_visit_date" class="form-control" value="<?php echo htmlspecialchars($row['next_visit_date'] ?? ''); ?>">
         </div>
         <div class="form-group mb-2">
     <label>Status:</label>
