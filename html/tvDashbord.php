@@ -50,139 +50,112 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #fff;
             min-height: 100vh;
             color: #333;
-            overflow-x: hidden;
+            padding: 20px;
         }
 
-        .dashboard-container {
-            display: flex;
-            height: 100vh;
-            width: 100%;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
         }
 
-        /* Video Section - 70% width */
-        .video-section {
-            flex: 0 0 70%;
-            background: rgba(0, 0, 0, 0.9);
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-right: 3px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .video-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hospital-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 0;
-        }
-
-        .hospital-video-alt {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 0;
-        }
-
-        .video-container-alt {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .video-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                45deg,
-                rgba(79, 70, 229, 0.1) 0%,
-                rgba(124, 58, 237, 0.1) 100%
-            );
-            pointer-events: none;
-        }
-
-        .video-header {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            right: 30px;
-            z-index: 10;
+        .section-header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .video-title {
-            font-size: 2.5rem;
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .section-title {
+            font-size: 2rem;
             font-weight: 700;
             color: #4f46e5;
             margin-bottom: 8px;
-            text-align: center;
         }
 
-        .video-subtitle {
+        .section-subtitle {
             color: #6b7280;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-
-        /* Patient Table Section - 30% width */
-        .patient-section {
-            flex: 0 0 30%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
-            border-left: 3px solid rgba(79, 70, 229, 0.3);
-        }
-
-        .patient-header {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            padding: 24px;
-            text-align: center;
-            border-bottom: 3px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .patient-header h2 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .patient-header p {
-            opacity: 0.9;
             font-size: 1rem;
         }
 
-        .patient-table-wrapper {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4f46e5;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            border-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .patient-table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            overflow-x: auto;
+            margin-bottom: 24px;
         }
 
         .patient-table {
             width: 100%;
             border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            min-width: 600px;
         }
 
         .patient-table th {
@@ -191,7 +164,7 @@
             padding: 16px 12px;
             text-align: left;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -200,33 +173,22 @@
             padding: 16px 12px;
             border-bottom: 1px solid #e2e8f0;
             vertical-align: middle;
-            font-size: 14px;
+        }
+
+        .patient-table tr {
+            transition: all 0.2s ease;
         }
 
         .patient-table tr:hover {
             background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             transform: scale(1.001);
-            transition: all 0.2s ease;
-        }
-
-        .patient-pid {
-            font-weight: 700;
-            color: #4f46e5;
-            font-size: 16px;
-        }
-
-        .patient-name {
-            color: #1e293b;
-            font-weight: 500;
         }
 
         .patient-status {
-            padding: 6px 12px;
+            padding: 4px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 0.8rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .status-waiting {
@@ -244,30 +206,6 @@
             color: #065f46;
         }
 
-        .current-time {
-            position: absolute;
-            bottom: 30px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-            z-index: 10;
-        }
-
-        .time-display {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #4f46e5;
-            margin-bottom: 4px;
-        }
-
-        .date-display {
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-
         .no-patients {
             text-align: center;
             padding: 40px 20px;
@@ -279,250 +217,163 @@
             margin-bottom: 16px;
             opacity: 0.5;
         }
-
-        /* Responsive Design */
-        @media (max-width: 1024px) {
-            .dashboard-container {
-                flex-direction: column;
-            }
-            
-            .video-section {
-                flex: 0 0 60%;
-                border-right: none;
-                border-bottom: 3px solid rgba(255, 255, 255, 0.2);
-            }
-            
-            .patient-section {
-                flex: 0 0 40%;
-                border-left: none;
-                border-top: 3px solid rgba(79, 70, 229, 0.3);
-            }
+ .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
+        .clock-box {
+            background: linear-gradient(135deg, #f8fafc, #e0e7ff 80%);
+            border: 2px solid #4f46e5;
+            border-radius: 12px;
+            padding: 10px 22px;
+            min-width: 230px;
+            text-align: right;
+            font-size: 1.1rem;
+            color: #4f46e5;
+            font-weight: 600;
+            box-shadow: 0 2px 10px rgba(79,70,229,0.07);
+            letter-spacing: 0.5px;
+            transition: box-shadow 0.2s;
+        }
+        .clock-box:hover {
+            box-shadow: 0 4px 18px rgba(79,70,229,0.13);
+        }
         @media (max-width: 768px) {
-            .video-title {
-                font-size: 2rem;
-            }
-            
-            .patient-header h2 {
-                font-size: 1.5rem;
-            }
-            
-            .patient-table th,
-            .patient-table td {
-                padding: 12px 8px;
-                font-size: 12px;
-            }
-        }
-
-        /* Auto-scroll animation for patient table */
-        .patient-table-wrapper {
-            animation: autoScroll 30s linear infinite;
-        }
-
-        @keyframes autoScroll {
-            0%, 20% { transform: translateY(0); }
-            80%, 100% { transform: translateY(-20px); }
+            .container { padding: 12px; }
+            .header-content { flex-direction: column; align-items: stretch; }
+            .header-actions { justify-content: center; }
+            .patient-table { font-size: 12px; }
+            .patient-table th, .patient-table td { padding: 8px 6px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="dashboard-container">
-        <!-- Video Section (70% width) -->
-        <div class="video-section">
-            <div class="video-container">
-                <!-- Hospital Video - YouTube Embed with Full Video Playback -->
-                <iframe class="hospital-video" 
-                        src="https://www.youtube.com/embed/cDDWvj_q-o8?autoplay=1&mute=1&loop=1&playlist=cDDWvj_q-o8&controls=0&showinfo=0&rel=0&modestbranding=1&start=0&end=0&iv_load_policy=3&fs=0&disablekb=1" 
-                        frameborder="0" 
-                        allow="autoplay; encrypted-media; fullscreen" 
-                        allowfullscreen
-                        title="Hospital Video">
-                </iframe>
-                
-                <!-- Alternative Video Container for better control -->
-                <div id="videoContainer" class="video-container-alt" style="display: none;">
-                    <video class="hospital-video-alt" autoplay muted loop playsinline>
-                        <source src="hospital_video.mp4" type="video/mp4">
-                        <source src="hospital_video.webm" type="video/webm">
-                    </video>
+    <div class="container">
+        <!-- Section Header -->
+        <div class="section-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="section-title">📋 Patient Queue</h1>
+                    <p class="section-subtitle">Current patients waiting for service</p>
                 </div>
-                
-                <!-- Fallback for when video doesn't work -->
-                <div class="video-fallback" id="videoFallback" style="display: none; align-items: center; justify-content: center; height: 100%; background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 2rem; text-align: center;">
-                    <div>
-                        <div style="font-size: 4rem; margin-bottom: 20px;">🏥</div>
-                        <div>Hospital Care Excellence</div>
-                        <div style="font-size: 1.2rem; margin-top: 10px; opacity: 0.8;">Your Health, Our Priority</div>
-                        <button onclick="tryLoadVideo()" style="margin-top: 20px; padding: 10px 20px; background: white; color: #4f46e5; border: none; border-radius: 8px; cursor: pointer;">Try Again</button>
-                    </div>
-                </div>
-                
-                <div class="video-overlay"></div>
-                
-                <!-- Current Time Display -->
-                <div class="current-time">
-                    <div class="time-display" id="currentTime">00:00:00</div>
-                    <div class="date-display" id="currentDate">Loading...</div>
+                 <div class="header-actions">
+                    <div id="clock" class="clock-box"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Patient Table Section (30% width) -->
-        <div class="patient-section">
-            <div class="patient-header">
-                <h2>📋 Patient Queue</h2>
-                <p>Current patients waiting for service</p>
-            </div>
-            
-            <div class="patient-table-wrapper">
-                <table class="patient-table">
-                    <thead>
-                        <tr>
-                            <th>PID</th>
-                            <th>Patient Name</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="patientTableBody">
-                        <?php
-                            // Fetch patients from database
-                            $sql = "SELECT PID, name, status FROM reception WHERE status IN ('RECEPTION_ENTRY', 'NURSING_VITAL', 'MEDICAL', 'DENTAL', 'NURSING_CARE', 'PHARMACY') ORDER BY created_date ASC";
-                            $result = mysqli_query($conn, $sql);
-                            
-                            if ($result && mysqli_num_rows($result) > 0):
-                                while ($row = mysqli_fetch_assoc($result)):
-                                    $pid = htmlspecialchars($row['PID']);
-                                    $name = htmlspecialchars($row['name']);
-                                    $status = htmlspecialchars($row['status']);
-                                    
-                                    // Determine status display and class
-                                    $statusDisplay = '';
-                                    $statusClass = 'status-waiting';
-                                    
-                                    switch($status) {
-                                        case 'RECEPTION_ENTRY':
-                                            $statusDisplay = 'Waiting';
-                                            $statusClass = 'status-waiting';
-                                            break;
-                                        case 'NURSING_VITAL':
-                                        case 'MEDICAL':
-                                        case 'DENTAL':
-                                        case 'NURSING_CARE':
-                                            $statusDisplay = 'Consulting';
-                                            $statusClass = 'status-consulting';
-                                            break;
-                                        case 'PHARMACY':
-                                            $statusDisplay = 'Pharmacy';
-                                            $statusClass = 'status-pharmacy';
-                                            break;
-                                        default:
-                                            $statusDisplay = 'In Process';
-                                            $statusClass = 'status-waiting';
-                                    }
-                                ?>
-                                <tr>
-                                    <td><strong class="patient-pid"><?php echo $pid; ?></strong></td>
-                                    <td class="patient-name"><?php echo $name; ?></td>
-                                    <td><span class="patient-status <?php echo $statusClass; ?>"><?php echo $statusDisplay; ?></span></td>
-                                </tr>
-                                <?php
-                                endwhile;
-                            else:
-                        ?>
-                        <tr>
-                            <td colspan="3" class="no-patients">
-                                <div class="no-patients-icon">😊</div>
-                                <div>No patients in queue</div>
-                            </td>
-                        </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
+        <!-- Patient List Table -->
+        <div class="patient-table-container">
+            <table class="patient-table">
+                <thead>
+                    <tr>
+                         <th>PID</th>
+                        <th>Patient Name</th>
+                        <th>Room</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="patientTableBody">
+                    <?php
+                        // Fetch patients from database
+                        $sql    = "SELECT * FROM tv_dashboard ORDER BY created_date ASC";
+                        $result = mysqli_query($conn, $sql);
+
+                        if ($result && mysqli_num_rows($result) > 0):
+                            while ($row = mysqli_fetch_assoc($result)):
+                                $pid = isset($row['PID']) ? htmlspecialchars($row['PID']) : '';
+                                // Use 'patient_name' as per your table definition, fallback to empty string if not set
+                                $name = isset($row['patient_name']) ? htmlspecialchars($row['patient_name']) : '';
+                                // Room can be null or missing
+                                $room   = isset($row['room']) && $row['room'] ? htmlspecialchars($row['room']) : '';
+                                $status = isset($row['status']) ? htmlspecialchars($row['status']) : '';
+                        // ...existing code...
+
+                                // Determine status display and class
+                                $statusDisplay = '';
+                                $statusClass   = 'status-waiting';
+
+                                switch ($status) {
+                                    case 'RECEPTION_ENTRY':
+                                        $statusDisplay = 'Waiting';
+                                        $statusClass   = 'status-waiting';
+                                        break;
+                                    case 'NURSING_VITAL':
+                                    case 'MEDICAL':
+                                    case 'DENTAL':
+                                    case 'NURSING_CARE':
+                                        $statusDisplay = 'Consulting';
+                                        $statusClass   = 'status-consulting';
+                                        break;
+                                    case 'PHARMACY':
+                                        $statusDisplay = 'Pharmacy';
+                                        $statusClass   = 'status-pharmacy';
+                                        break;
+                                    default:
+                                        $statusDisplay = 'In Process';
+                                        $statusClass   = 'status-waiting';
+                                }
+                            ?>
+		                            <tr>
+		                                <td><strong><?php echo $pid; ?></strong></td>
+		                                <td><?php echo $name; ?></td>
+		                                <td><?php echo $room; ?></td>
+		                               <td>
+             <span class="patient-status <?php echo $statusClass; ?>">
+            <?php
+                // Show user-friendly status label
+                switch ($status) {
+                    case 'RECEPTION_ENTRY':  echo 'RECEPTION - ENTRY'; break;
+                    case 'NURSING_VITAL':    echo 'NURSING - VITAL'; break;
+                    case 'MEDICAL':          echo 'MEDICAL'; break;
+                    case 'DENTAL':           echo 'DENTAL'; break;
+                    case 'NURSING_CARE':     echo 'NURSING - CARE'; break;
+                    case 'PHARMACY':         echo 'PHARMACY'; break;
+                    case 'RECEPTION_BILL':   echo 'RECEPTION - BILL'; break;
+                    default:                 echo htmlspecialchars($status); break;
+                }
+            ?>
+        </span>
+        </td>	                                                                <?php echo $statusClass; ?>"><?php echo $statusDisplay; ?></span></td>
+		                                 <td>
+		                                    <button class="btn btn-primary" style="padding:6px 16px;font-size:13px;" title="Announce">
+		                                        <span style="font-size:1.3em;">🔊</span>
+		                                    </button>
+		                                </td>
+		                            </tr>
+		                            <?php
+                                            endwhile;
+                                        else:
+                                    ?>
+                    <tr>
+                        <td colspan="3" class="no-patients">
+                            <div class="no-patients-icon">😊</div>
+                            <div>No patients in queue</div>
+                        </td>
+                    </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // Handle video loading and full playback
-        function tryLoadVideo() {
-            const iframe = document.querySelector('.hospital-video');
-            const fallback = document.getElementById('videoFallback');
-            
-            // Try to reload the iframe
-            if (iframe) {
-                iframe.src = iframe.src;
-                fallback.style.display = 'none';
-            }
-        }
-
-        // Check if iframe loads properly
-        function checkVideoLoad() {
-            const iframe = document.querySelector('.hospital-video');
-            const fallback = document.getElementById('videoFallback');
-            
-            // Set a timeout to check if video loads
-            setTimeout(() => {
-                try {
-                    // Try to access iframe content (will fail if blocked)
-                    if (iframe && iframe.contentDocument === null) {
-                        console.log('Video iframe may be blocked');
-                    }
-                } catch (e) {
-                    console.log('Video loading normally');
-                }
-            }, 3000);
-        }
-
-        // Alternative: Use HTML5 video if YouTube is blocked
-        function useLocalVideo() {
-            const iframe = document.querySelector('.hospital-video');
-            const videoContainer = document.getElementById('videoContainer');
-            const fallback = document.getElementById('videoFallback');
-            
-            if (iframe) iframe.style.display = 'none';
-            if (videoContainer) {
-                videoContainer.style.display = 'block';
-                const video = videoContainer.querySelector('video');
-                if (video) {
-                    video.play().catch(e => {
-                        console.log('Local video failed to play:', e);
-                        fallback.style.display = 'flex';
-                    });
-                }
-            }
-        }
-
-        // Update current time and date
-        function updateDateTime() {
+        // Clock function
+        function updateClock() {
             const now = new Date();
-            
-            // Format time
-            const timeOptions = {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true
-            };
-            const timeString = now.toLocaleTimeString('en-US', timeOptions);
-            
-            // Format date
-            const dateOptions = {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            };
-            const dateString = now.toLocaleDateString('en-US', dateOptions);
-            
-            document.getElementById('currentTime').textContent = timeString;
-            document.getElementById('currentDate').textContent = dateString;
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            const dateStr = now.toLocaleDateString(undefined, options);
+            const timeStr = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('clock').textContent = dateStr + ' ' + timeStr;
         }
-
+        setInterval(updateClock, 1000);
+        updateClock();
         // Auto-refresh patient table every 30 seconds
         function refreshPatientTable() {
-            // Only refresh the patient table, not the whole page
             fetch(window.location.href)
                 .then(response => response.text())
                 .then(html => {
@@ -530,7 +381,7 @@
                     const doc = parser.parseFromString(html, 'text/html');
                     const newTableBody = doc.getElementById('patientTableBody');
                     const currentTableBody = document.getElementById('patientTableBody');
-                    
+
                     if (newTableBody && currentTableBody) {
                         currentTableBody.innerHTML = newTableBody.innerHTML;
                     }
@@ -540,17 +391,9 @@
                 });
         }
 
-        // Initialize
+        // Initialize auto-refresh
         document.addEventListener('DOMContentLoaded', function() {
-            updateDateTime();
-            setInterval(updateDateTime, 1000); // Update every second
             setInterval(refreshPatientTable, 30000); // Refresh every 30 seconds
-            
-            // Check video loading
-            checkVideoLoad();
-            
-            // If you want to test local video instead, uncomment the line below:
-            // setTimeout(useLocalVideo, 5000);
         });
     </script>
 </body>
@@ -558,5 +401,5 @@
 
 <?php
     // Include footer
-    include 'footer_section.php';
+include 'footer_section.php';
 ?>

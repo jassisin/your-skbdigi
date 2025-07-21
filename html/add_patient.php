@@ -1,105 +1,147 @@
 <?php
-require('session.php');
+    require 'session.php';
 
-require('connection.php');
+    require 'connection.php';
 
-if(isset($_SESSION['main_admin'])){
-    $username=$_SESSION['main_admin'];
-  }
-// Fetch all data from the reception table
-$sql = "SELECT * FROM reception";
-$result = mysqli_query($conn, $sql);
+    if (isset($_SESSION['main_admin'])) {
+        $username = $_SESSION['main_admin'];
+    }
+    // Fetch all data from the reception table
+    $sql    = "SELECT * FROM reception";
+    $result = mysqli_query($conn, $sql);
 
-// save information to the reception table
-if (isset($_POST['submit'])) {
-    // Collect form data
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $nationality = mysqli_real_escape_string($conn, $_POST['nationality']);
-    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
-    $whatsapp = mysqli_real_escape_string($conn, $_POST['whatsapp']);
-    $area = mysqli_real_escape_string($conn, $_POST['area']);
-    $residence = mysqli_real_escape_string($conn, $_POST['residence']);
-    $camp_boss = mysqli_real_escape_string($conn, $_POST['camp_boss']);
-    $hr_staff = mysqli_real_escape_string($conn, $_POST['hr_staff']);
-    $hr_phone = mysqli_real_escape_string($conn, $_POST['company_phone']);
-    $company = mysqli_real_escape_string($conn, $_POST['company']);
-    $refferal = mysqli_real_escape_string($conn, $_POST['referral']);
-    $gate_service_site = mysqli_real_escape_string($conn, $_POST['gate_service_site']);
-    $status = mysqli_real_escape_string($conn, $_POST['status']);
-    $notes = mysqli_real_escape_string($conn, $_POST['notes']);
-    $created_date = date('Y-m-d H:i:s');
+    // save information to the reception table
+    if (isset($_POST['submit'])) {
+        // Collect form data
+        $name              = mysqli_real_escape_string($conn, $_POST['name']);
+        $nationality       = mysqli_real_escape_string($conn, $_POST['nationality']);
+        $phone             = mysqli_real_escape_string($conn, $_POST['phone']);
+        $whatsapp          = mysqli_real_escape_string($conn, $_POST['whatsapp']);
+        $area              = mysqli_real_escape_string($conn, $_POST['area']);
+        $residence         = mysqli_real_escape_string($conn, $_POST['residence']);
+        $camp_boss         = mysqli_real_escape_string($conn, $_POST['camp_boss']);
+        $hr_staff          = mysqli_real_escape_string($conn, $_POST['hr_staff']);
+        $hr_phone          = mysqli_real_escape_string($conn, $_POST['company_phone']);
+        $company           = mysqli_real_escape_string($conn, $_POST['company']);
+        $refferal          = mysqli_real_escape_string($conn, $_POST['referral']);
+        $gate_service_site = mysqli_real_escape_string($conn, $_POST['gate_service_site']);
+        $status            = mysqli_real_escape_string($conn, $_POST['status']);
+        $notes             = mysqli_real_escape_string($conn, $_POST['notes']);
+        $created_date      = date('Y-m-d H:i:s');
 
-// Generate PID function
-    function generatePID($conn) {
-        // Get the last PID from the database
-        $query = "SELECT PID FROM reception WHERE PID IS NOT NULL AND PID != '' ORDER BY 
-                  SUBSTRING(PID, 1, 1), 
+        // Generate PID function
+        function generatePID($conn)
+        {
+            // Get the last PID from the database
+            $query = "SELECT PID FROM reception WHERE PID IS NOT NULL AND PID != '' ORDER BY
+                  SUBSTRING(PID, 1, 1),
                   CAST(SUBSTRING(PID, 3) AS UNSIGNED) DESC LIMIT 1";
-        $result = mysqli_query($conn, $query);
-        
-        if(mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
-            $lastPID = $row['PID'];
-            
-            // Extract letter and number parts (assuming format is A-0001)
-            $parts = explode('-', $lastPID);
-            $letter = $parts[0];
-            $number = intval($parts[1]);
-            
-            // Increment the number
-            $number++;
-            
-            // Check if we need to move to next letter
-            if($number > 9999) {
-                $letter = chr(ord($letter) + 1);
-                $number = 1;
-                
-                // Check if we've exceeded Z
-                if($letter > 'Z') {
-                    return null; // Maximum limit reached
-                }
-            }
-            
-            // Format new PID with hyphen
-            $newPID = $letter . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
-        } else {
-            // First entry, start with A-0001
-            $newPID = 'A-0001';
-        }
-        
-        // Double-check that this PID doesn't already exist (in case of concurrent requests)
-        $checkQuery = "SELECT id FROM reception WHERE PID = '" . mysqli_real_escape_string($conn, $newPID) . "'";
-        $checkResult = mysqli_query($conn, $checkQuery);
-        
-        if(mysqli_num_rows($checkResult) > 0) {
-            // PID already exists, recursively try to get next one
-            return generatePID($conn);
-        }
-        
-        return $newPID;
-    }
-    
-    // Generate unique PID
-    $pid = generatePID($conn);
-    
-    if($pid === null) {
-        echo "<script>alert('Maximum PID limit reached (Z-9999). Cannot add more records.'); window.history.back();</script>";
-        exit;
-    }
+            $result = mysqli_query($conn, $query);
 
-    // Insert into DB
-    $sql = "INSERT INTO reception 
+            if (mysqli_num_rows($result) > 0) {
+                $row     = mysqli_fetch_assoc($result);
+                $lastPID = $row['PID'];
+
+                // Extract letter and number parts (assuming format is A-0001)
+                $parts  = explode('-', $lastPID);
+                $letter = $parts[0];
+                $number = intval($parts[1]);
+
+                // Increment the number
+                $number++;
+
+                // Check if we need to move to next letter
+                if ($number > 9999) {
+                    $letter = chr(ord($letter) + 1);
+                    $number = 1;
+
+                    // Check if we've exceeded Z
+                    if ($letter > 'Z') {
+                        return null; // Maximum limit reached
+                    }
+                }
+
+                // Format new PID with hyphen
+                $newPID = $letter . '-' . str_pad($number, 4, '0', STR_PAD_LEFT);
+            } else {
+                // First entry, start with A-0001
+                $newPID = 'A-0001';
+            }
+
+            // Double-check that this PID doesn't already exist (in case of concurrent requests)
+            $checkQuery  = "SELECT id FROM reception WHERE PID = '" . mysqli_real_escape_string($conn, $newPID) . "'";
+            $checkResult = mysqli_query($conn, $checkQuery);
+
+            if (mysqli_num_rows($checkResult) > 0) {
+                // PID already exists, recursively try to get next one
+                return generatePID($conn);
+            }
+
+            return $newPID;
+        }
+
+        // Generate unique PID
+        $pid = generatePID($conn);
+
+        if ($pid === null) {
+            echo "<script>alert('Maximum PID limit reached (Z-9999). Cannot add more records.'); window.history.back();</script>";
+            exit;
+        }
+
+        // Insert into DB
+        $sql = "INSERT INTO reception
         (name, nationality, phone, whatsapp, area, residence, camp_boss, hr_staff, hr_phone, company, refferal, gate_service_site, status, notes, PID, created_date)
         VALUES
         ('$name', '$nationality', '$phone', '$whatsapp', '$area', '$residence', '$camp_boss', '$hr_staff', '$hr_phone', '$company', '$refferal', '$gate_service_site', '$status', '$notes', '$pid', '$created_date')";
-    if (mysqli_query($conn, $sql)) {
-        echo "<script>alert('Patient added successfully!'); window.location='reception.php';</script>";
-        exit;
-    } else {
-        echo "<script>alert('Error: " . mysqli_error($conn) . "');</script>";
+        if (mysqli_query($conn, $sql)) {
+            switch (strtoupper($status)) {
+                case 'DENTAL':
+                    $target_table = 'dental_table';
+                    break;
+                case 'MEDICAL':
+                    $target_table = 'medical_table';
+                    break;
+                case 'NURSING_VITAL':
+                case 'NURSING_CARE':
+                    $target_table = 'nursing_table';
+                    break;
+                case 'PHARMACY':
+                    $target_table = 'pharmacy_table';
+                    break;
+                default:
+                    $target_table = null; // For RECEPTION_ENTRY, RECEPTION_BILL, etc.
+            }
+            if ($target_table) {
+                // Check if PID already exists in the target table
+                $checkQuery = "SELECT id FROM $target_table WHERE PID = ?";
+                $stmt       = $conn->prepare($checkQuery);
+                $stmt->bind_param("s", $pid);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                if ($result->num_rows > 0) {
+                   $status = ''; // Set status as empty
+                    // Update existing record
+                    $updateQuery = "UPDATE $target_table SET name=?, status=?, next_visit_date=?, notes=? WHERE PID=?";
+                    $stmt        = $conn->prepare($updateQuery);
+                    $stmt->bind_param("sssss", $name, $status, $next_visit_date, $notes, $pid);
+                } else {
+                    // Insert new record
+                    $insertQuery = "INSERT INTO $target_table (PID, name, status, next_visit_date, notes, created_date) VALUES (?, ?, ?, ?, ?, ?)";
+                    $stmt = $conn->prepare($insertQuery);
+                    $stmt->bind_param("ssssss", $pid, $name, $status, $next_visit_date, $notes, $created_date);
+                }
+
+                $stmt->execute();
+            }
+
+            echo "<script>alert('Patient added successfully!'); window.location='reception.php';</script>";
+            exit;
+        } else {
+            echo "<script>alert('Error: " . mysqli_error($conn) . "');</script>";
+        }
     }
-}
-?>                  
+?>
 <!DOCTYPE html>
 
 <html
@@ -170,7 +212,7 @@ if (isset($_POST['submit'])) {
       <div class="layout-container">
         <!-- Menu -->
 
-        <?php include("header.php"); ?>
+        <?php include "header.php"; ?>
 
         <!-- / Menu -->
 
@@ -180,7 +222,7 @@ if (isset($_POST['submit'])) {
 
           <nav
             class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-            id="layout-navbar" style="background-color: <?php echo $page_heading_color; ?>;">
+            id="layout-navbar" style="background-color:                                                                                                               <?php echo $page_heading_color; ?>;">
             <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
               <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
                 <i class="mdi mdi-menu mdi-24px"></i>
@@ -204,7 +246,7 @@ if (isset($_POST['submit'])) {
               <ul class="navbar-nav flex-row align-items-center ms-auto">
                 <!-- Place this tag where you want the button to render. -->
                 <li class="nav-item lh-1 me-3">
-                  <?=$username?>
+                  <?php echo $username ?>
                 </li>
 
                 <!-- User -->
@@ -218,7 +260,7 @@ if (isset($_POST['submit'])) {
                     </div>
                   </a>
                   <ul class="dropdown-menu dropdown-menu-end mt-3 py-2">
-              
+
                     <li>
                       <div class="dropdown-divider my-1"></div>
                     </li>
@@ -252,68 +294,68 @@ if (isset($_POST['submit'])) {
                     <label for="name">Name:</label>
                     <input type="text" class="form-control" id="name" name="name" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="nationality">Nationality:</label>
                     <input type="text" class="form-control" id="nationality" name="nationality" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="phone">Phone:</label>
                     <input type="text" class="form-control" id="phone" name="phone" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="whatsapp">Whatsapp:</label>
                     <input type="text" class="form-control" id="whatsapp" name="whatsapp">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="area">Area:</label>
                     <input type="text" class="form-control" id="area" name="area" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="residence">Residence:</label>
                     <input type="text" class="form-control" id="residence" name="residence" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="camp_boss">Camp Boss:</label>
                     <input type="text" class="form-control" id="camp_boss" name="camp_boss">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="hr_staff">HR Staff:</label>
                     <input type="text" class="form-control" id="hr_staff" name="hr_staff">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="company_phone">Company Phone:</label>
                     <input type="text" class="form-control" id="company_phone" name="company_phone">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="company">Company:</label>
                     <input type="text" class="form-control" id="company" name="company" required>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="referral">Referral:</label>
                     <input type="text" class="form-control" id="referral" name="referral">
                 </div>
-                
+
                 <div class="form-group">
                     <label for="gate_service_site">Gate Service Site:</label>
                     <input type="text" class="form-control" id="gate_service_site" name="gate_service_site">
                 </div>
-                
+
                    <div class="form-group">
                     <label for="status">Status:</label>
                     <select class="form-control" id="status" name="status" required>
-                       <option value="">Select Status</option> 
+                       <option value="">Select Status</option>
                        <option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>
-                       <option value="NURSING_VITAL">NURSING - VITAL</option>   
+                       <option value="NURSING_VITAL">NURSING - VITAL</option>
                         <option value="MEDICAL">MEDICAL</option>
                         <option value="DENTAL">DENTAL</option>
                         <option value="NURSING_CARE">NURSING - CARE</option>
@@ -321,14 +363,14 @@ if (isset($_POST['submit'])) {
                         <option value="RECEPTION_BILL">RECEPTION - BILL</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="notes">Notes:</label>
                     <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
                 </div>
 
                 <div class="form-group justify-content-end">
-                    <!-- <button type="button" class="btn btn-secondary" onclick="autofillForm()">Autofill</button> -->
+                    <button type="button" class="btn btn-secondary" onclick="autofillForm()">Autofill</button>
                     <button type="submit" name="submit" class="btn btn-primary">Save</button>
                 </div>
             </form>
@@ -339,7 +381,7 @@ if (isset($_POST['submit'])) {
 
             <!-- Footer -->
             <footer class="content-footer footer bg-footer-theme">
-              <div class="container-xxl" style="background-color: <?php echo $footer_color; ?>;">
+              <div class="container-xxl" style="background-color:                                                                                                                                   <?php echo $footer_color; ?>;">
                 <div
                   class="footer-container d-flex align-items-center justify-content-between py-3 flex-md-row flex-column">
                   <div class="text-body mb-2 mb-md-0">
@@ -347,11 +389,11 @@ if (isset($_POST['submit'])) {
                     <script>
                       document.write(new Date().getFullYear());
                     </script>
-                  
+
                   </div>
                   <div class="d-none d-lg-inline-block">
                     <a href="https://sbkdigi.in/" class="footer-link me-3" target="_blank">SBK Details</a>
-                    
+
                   </div>
                 </div>
               </div>
@@ -370,7 +412,7 @@ if (isset($_POST['submit'])) {
     </div>
     <!-- / Layout wrapper -->
 
-    
+
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->

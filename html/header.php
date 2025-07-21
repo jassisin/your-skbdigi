@@ -222,9 +222,31 @@ if (isset($_SESSION['role'])) {
   margin-left: auto;
   font-weight: 600;
 }
+
+/* Collapsed sidebar */
+.layout-menu.collapsed {
+  width: 60px !important;
+  min-width: 60px !important;
+  overflow-x: hidden;
+}
+.layout-menu.collapsed .menu-inner,
+.layout-menu.collapsed .app-brand-text,
+.layout-menu.collapsed .menu-link div[data-i18n] {
+  display: none !important;
+}
+.layout-menu.collapsed .menu-icon {
+  margin-right: 0 !important;
+  justify-content: center;
+}
+body.menu-collapsed .dashboard-container {
+  margin-left: 60px !important;
+}
 </style>
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+  <button id="sidebarCollapseBtn" class="layout-menu-toggle menu-link text-large" style="margin: 0.5rem 1rem;">
+  <i class="mdi mdi-chevron-double-left" id="collapseIcon"></i>
+</button>
   <div class="app-brand demo">
     <a href="index.html" class="app-brand-link">
       <img src="../assets/img/<?php echo $logo_image; ?>" alt="Logo" class="w-px-40 h-auto rounded-circle" />

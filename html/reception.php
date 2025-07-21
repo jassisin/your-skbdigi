@@ -1,65 +1,48 @@
 <?php
-require "session.php";
-require "connection.php";
+    require "session.php";
+    require "connection.php";
 
-if (isset($_SESSION["main_admin"])) {
-    $username = $_SESSION["main_admin"];
-} else {
-    $username = "Guest"; // Default value if session not set
-}
-
-// Get dates in Y-m-d format
-$today = date('Y-m-d');
-$yesterday = date('Y-m-d', strtotime('-1 day'));
-$tomorrow = date('Y-m-d', strtotime('+1 day'));
-
-// Previous
-$sql_prev = "SELECT * FROM reception 
-    WHERE DATE(created_date) = '$yesterday' OR next_visit_date = '$yesterday'";
-$result_prev = mysqli_query($conn, $sql_prev);
-
-// Today
-$sql_today = "SELECT * FROM reception 
-    WHERE DATE(created_date) = '$today' OR next_visit_date = '$today'";
-$result_today = mysqli_query($conn, $sql_today);
-
-// Next
-$sql_next = "SELECT * FROM reception 
-    WHERE DATE(created_date) = '$tomorrow' OR next_visit_date = '$tomorrow'";
-$result_next = mysqli_query($conn, $sql_next);
-
-// Handle search filters
-$search_by = $_GET['search_by'] ?? '';
-$search_value = $_GET['search_value'] ?? '';
-
-if (!empty($search_by) && !empty($search_value)) {
-    $search_value = mysqli_real_escape_string($conn, $search_value);
-    if ($search_by === "name") {
-        $sql = "SELECT * FROM reception WHERE name LIKE '%$search_value%'";
-    } elseif ($search_by === "status") {
-        $sql = "SELECT * FROM reception WHERE status LIKE '%$search_value%'";
+    if (isset($_SESSION["main_admin"])) {
+        $username = $_SESSION["main_admin"];
     } else {
-        $sql = "SELECT * FROM reception";
+        $username = "Guest"; // Default value if session not set
     }
-} else {
-    $sql = "SELECT * FROM reception";
-}
 
-$result = mysqli_query($conn, $sql);
+    // Handle search filters
+    $search_by    = $_GET['search_by'] ?? '';
+    $search_value = $_GET['search_value'] ?? '';
+ 
+    $today = date('Y-m-d');
+    if (! empty($search_by) && ! empty($search_value)) {
+        $search_value = mysqli_real_escape_string($conn, $search_value);
+        if ($search_by === "name") {
+            $sql = "SELECT * FROM reception WHERE name LIKE '%$search_value%'";
+        } elseif ($search_by === "status") {
+            $sql = "SELECT * FROM reception WHERE status LIKE '%$search_value%'";
+        } elseif ($searchBy === "phone") {
+            $sql = "SELECT * FROM reception WHERE phone LIKE '%$searchValue%'";
+        } else {
+          $sql = "SELECT * FROM reception WHERE DATE(created_date) = '$today' OR next_visit_date = '$today'";
+        }
+    } else {
+          $sql = "SELECT * FROM reception WHERE DATE(created_date) = '$today' OR next_visit_date = '$today'";
+    }
 
-if (isset($_POST["delete"]) && isset($_POST["delete_id"])) {
-    $delete_id = intval($_POST["delete_id"]);
-    $del_sql = "DELETE FROM reception WHERE id = $delete_id";
-    mysqli_query($conn, $del_sql);
-    echo "<script>window.location.href='reception.php';</script>";
-    exit();
-}
+    $result = mysqli_query($conn, $sql);
 
-// Don’t close connection here - it’s needed for header.php
-$page_title = "Reception List";
-$page_heading_color = "#9055fd";
-$footer_color = "#ffffff";
-include "header_section.php";
+    if (isset($_POST["delete"]) && isset($_POST["delete_id"])) {
+        $delete_id = intval($_POST["delete_id"]);
+        $del_sql   = "DELETE FROM reception WHERE id = $delete_id";
+        mysqli_query($conn, $del_sql);
+        echo "<script>window.location.href='reception.php';</script>";
+        exit();
+    }
+
+    // Don’t close connection here - it’s needed for header.php
+    $page_title         = "Reception List";
+    $page_heading_color = "#9055fd";
+    $footer_color       = "#ffffff";
+    include "header_section.php";
 ?>
 
 <!DOCTYPE html>
@@ -85,7 +68,21 @@ include "header_section.php";
         width: 8px;
         height: 8px;
     }
+#expenseTable th:nth-child(2),
+#expenseTable td:nth-child(2) {
+    min-width: 120px;
+    max-width: 160px;
+    width: 140px;
+    white-space: nowrap;
+}
 
+#expenseTable th:nth-child(3),
+#expenseTable td:nth-child(3) {
+    min-width: 180px;
+    max-width: 240px;
+    width: 200px;
+    white-space: nowrap;
+}
     .expense-table-scroll::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 4px;
@@ -153,6 +150,9 @@ include "header_section.php";
         border-bottom: 1px solid #e9ecef;
         vertical-align: middle;
         white-space: nowrap;
+         max-width: 180px;
+         white-space: normal; /* Allow wrapping */
+
     }
 
     @media (max-width: 768px) {
@@ -164,6 +164,8 @@ include "header_section.php";
         #expenseTable td {
             padding: 8px 6px;
             font-size: 14px;
+             max-width: 180px;
+           white-space: normal;
         }
     }
 
@@ -809,48 +811,38 @@ include "header_section.php";
     </style>
     <!-- Dashboard Section -->
     <div class="section-content active" id="dashboard-section">
-        <!-- Calendar Section -->
-        <div class="calendar-container">
-            <div class="calendar-header">
-                <div class="calendar-nav">
-                    <button onclick="changeDate(-1)">
-                        ⬅️ Previous Day
-                    </button>
-                    <button class="today-btn" onclick="goToToday()">
-                        📅 Today
-                    </button>
-                    <button onclick="changeDate(1)">
-                        Next Day ➡️
-                    </button>
+               <div class="section-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="section-title" id="sectionTitle">Reception List</h1>
+                    <p class="section-subtitle" id="sectionSubtitle">Manage Patient entry and admissions</p>
                 </div>
-                <div class="calendar-title" id="selectedDateTitle">
-                    Today's Appointments
-                </div>
-                <div class="date-picker-container">
-                    <label for="datePicker" style="font-size: 14px; color: #6b7280; font-weight: 600;">Jump to
-                        Date:</label>
-                    <input type="date" id="datePicker" class="date-picker" onchange="jumpToDate()">
+                 <div class="d-flex justify-content-between align-items-center mb-4">
+                        <a href="add_patient.php" class="btn btn-primary">Add Patient</a>
                 </div>
             </div>
+
         </div>
+
         <div class="section-content active" id="reception-section">
             <div class="calendar-container">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="py-3 mb-4"><u>Reception List</u></h4>
-                        <a href="add_patient.php" class="btn btn-primary">Add Patient</a>
-                    </div>
-                    <div class="d-flex mb-4">
-                        <select id="searchBy" class="form-select" style="width: 180px;"
-                            onchange="handleSearchOptionChange()">
-                            <option value="">Search By</option>
-                            <option value="name">Name</option>
-                            <option value="status">Status</option>
-                        </select>
-                        <div id="searchInputWrapper" class="ms-3"></div>
-                        <button id="searchButton" class="btn btn-primary ms-3" onclick="searchRecords()">Search</button>
-                        <button id="clearButton" class="btn btn-secondary ms-2" onclick="clearSearch()">Clear</button>
-                    </div>
+             <div class="d-flex mb-4 align-items-center flex-wrap gap-2">
+    <select id="searchBy" class="form-select" style="width: 180px;" onchange="handleSearchOptionChange()">
+        <option value="">Search By</option>
+        <option value="name">Name</option>
+        <option value="status">Status</option>
+         <option value="phone">Phone</option>
+    </select>
+    <div id="searchInputWrapper" class="ms-3"></div>
+    <button id="searchButton" class="btn btn-primary ms-3" onclick="searchRecords()">Search</button>
+    <button id="clearButton" class="btn btn-secondary ms-2" onclick="clearSearch()">Clear</button>
+    <div class="date-picker-container ms-auto" style="min-width: 260px;">
+        <label for="datePicker" style="font-size: 14px; color: #6b7280; font-weight: 600;">Jump to Date:</label>
+        <input type="date" id="datePicker" class="date-picker" onchange="jumpToDate()">
+    </div>
+</div>
+
                     <!-- Add space between search and table -->
                     <div style="height: 18px;"></div>
                     <div class="expense-table-scroll">
@@ -858,6 +850,7 @@ include "header_section.php";
                             <thead>
                                 <tr>
                                     <th>Edit</th>
+                                    <th>Call</th>
                                     <th>PID</th>
                                     <th>Name</th>
                                     <th>Status</th>
@@ -878,89 +871,94 @@ include "header_section.php";
                             </thead>
                             <tbody id="tableBody">
                                 <?php // If search is performed, fetch filtered results
-                        if (
-                            $_SERVER["REQUEST_METHOD"] === "POST" &&
-                            isset($_POST["searchBy"]) &&
-                            isset($_POST["searchValue"])
-                        ) {
-                            $searchBy = mysqli_real_escape_string($conn, $_POST["searchBy"]);
-                            $searchValue = mysqli_real_escape_string($conn, $_POST["searchValue"]);
+                                    if (
+                                        $_SERVER["REQUEST_METHOD"] === "POST" &&
+                                        isset($_POST["searchBy"]) &&
+                                        isset($_POST["searchValue"])
+                                    ) {
+                                        $searchBy    = mysqli_real_escape_string($conn, $_POST["searchBy"]);
+                                        $searchValue = mysqli_real_escape_string($conn, $_POST["searchValue"]);
 
-                            if ($searchBy === "name") {
-                                $sql = "SELECT * FROM reception WHERE name LIKE '%$searchValue%'";
-                            } elseif ($searchBy === "status") {
-                                $sql = "SELECT * FROM reception WHERE status = '$searchValue'";
-                            } else {
-                                $sql = "SELECT * FROM reception"; // Default to all records
-                            }
+                                        if ($searchBy === "name") {
+                                            $sql = "SELECT * FROM reception WHERE name LIKE '%$searchValue%'";
+                                        } elseif ($searchBy === "status") {
+                                            $sql = "SELECT * FROM reception WHERE status = '$searchValue'";
+                                        } else {
+                                            $sql = "SELECT * FROM reception"; // Default to all records
+                                        }
 
-                            $result = mysqli_query($conn, $sql);
-                        } else {
-                            // Use the initial query for all records
-                            $result = mysqli_query($conn, $sql);
-                        } ?>
-                                <?php if (mysqli_num_rows($result) > 0): ?>
-                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                        $result = mysqli_query($conn, $sql);
+                                    } else {
+                                        // Use the initial query for all records
+                                        $result = mysqli_query($conn, $sql);
+                                }?>
+<?php if (mysqli_num_rows($result) > 0): ?>
+<?php while ($row = mysqli_fetch_assoc($result)): ?>
                                 <tr>
                                     <td>
                                         <a href="edit_patient.php?id=<?php echo $row[
-                                           "id"
-                                       ]; ?>" title="Edit">
+                                                                         "id"
+                                                                     ]; ?>" title="Edit">
                                             <i class="mdi mdi-pencil" style="font-size:20px;color:#1976d2;"></i>
                                         </a>
                                     </td>
+                                    <td>
+                                         <button class="btn-icon btn-call" onclick="callPatient('<?php echo $pid ?>')" title="Call Patient">
+						                    📞
+						                </button>
+                                    </td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["PID"]
-                                    ); ?></td>
+                                            $row["PID"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["name"]
-                                    ); ?></td>
+                                            $row["name"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["status"]
-                                    ); ?></td>
+                                            $row["status"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["nationality"]
-                                    ); ?></td>
+                                            $row["nationality"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["phone"]
-                                    ); ?></td>
+                                            $row["phone"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["whatsapp"]
-                                    ); ?></td>
+                                            $row["whatsapp"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["area"]
-                                    ); ?></td>
+                                            $row["area"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["residence"]
-                                    ); ?></td>
+                                            $row["residence"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["camp_boss"]
-                                    ); ?></td>
+                                            $row["camp_boss"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["hr_staff"]
-                                    ); ?></td>
+                                            $row["hr_staff"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["hr_phone"]
-                                    ); ?></td>
+                                            $row["hr_phone"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["company"]
-                                    ); ?></td>
+                                            $row["company"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["refferal"]
-                                    ); ?></td>
+                                            $row["refferal"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["gate_service_site"]
-                                    ); ?></td>
+                                            $row["gate_service_site"]
+                                        ); ?></td>
                                     <td><?php echo htmlspecialchars(
-                                        $row["notes"]
-                                    ); ?></td>
+                                            $row["notes"]
+                                        ); ?></td>
                                     <td>
                                         <form method="post" action=""
                                             onsubmit="return confirm('Are you sure you want to delete this patient?');"
                                             style="display:inline;">
                                             <input type="hidden" name="delete_id" value="<?php echo $row[
-                                             "id"
-                                         ]; ?>">
+                                                                                             "id"
+                                                                                         ]; ?>">
                                             <button type="submit" name="delete" class="btn btn-link p-0" title="Delete">
                                                 <i class="mdi mdi-trash-can" style="font-size:20px;color:#d32f2f;"></i>
                                             </button>
@@ -968,7 +966,7 @@ include "header_section.php";
                                     </td>
                                 </tr>
                                 <?php endwhile; ?>
-                                <?php else: ?>
+<?php else: ?>
                                 <tr>
                                     <td colspan="17" class="text-center">No records found.</td>
                                 </tr>
@@ -983,27 +981,77 @@ include "header_section.php";
         <?php include "footer_section.php"; ?>
 
         <script>
-        function handleSearchOptionChange() {
-            const selectedOption = $('#searchBy').val();
-            let searchInputHtml = '';
+   function handleSearchOptionChange() {
+    const selectedOption = $('#searchBy').val();
+    let searchInputHtml = '';
 
-            if (selectedOption === 'name') {
-                searchInputHtml = '<input type="text" id="searchInput" class="form-control" placeholder="Enter Name">';
-            } else if (selectedOption === 'status') {
-                searchInputHtml = '<select id="searchInput" class="form-select">' +
-                    '<option value="">Select Status</option>' +
-                    '<option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>' +
-                    '<option value="NURSING_VITAL">NURSING - VITAL</option>' +
-                    '<option value="MEDICAL">MEDICAL</option>' +
-                    '<option value="DENTAL">DENTAL</option>' +
-                    '<option value="NURSING_CARE">NURSING - CARE</option>' +
-                    '<option value="PHARMACY">PHARMACY</option>' +
-                    '<option value="RECEPTION_BILL">RECEPTION - BILL</option>' +
-                    '</select>';
-            }
+    if (selectedOption === 'name' || selectedOption === 'phone') {
+        searchInputHtml = '<input type="text" id="searchInput" class="form-control" placeholder="Enter ' + (selectedOption === 'phone' ? 'Phone' : 'Name') + '">';
+    } else if (selectedOption === 'status') {
+        searchInputHtml = '<select id="searchInput" class="form-select">' +
+            '<option value="">Select Status</option>' +
+            '<option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>' +
+            '<option value="NURSING_VITAL">NURSING - VITAL</option>' +
+            '<option value="MEDICAL">MEDICAL</option>' +
+            '<option value="DENTAL">DENTAL</option>' +
+            '<option value="NURSING_CARE">NURSING - CARE</option>' +
+            '<option value="PHARMACY">PHARMACY</option>' +
+            '<option value="RECEPTION_BILL">RECEPTION - BILL</option>' +
+            '</select>';
+    }
 
-            $('#searchInputWrapper').html(searchInputHtml);
+    $('#searchInputWrapper').html(searchInputHtml);
+}
+    function jumpToDate() {
+    const selectedDate = document.getElementById('datePicker').value;
+    if (!selectedDate) return;
+
+    $.ajax({
+        url: 'fetch_records.php',
+        method: 'POST',
+        data: {
+            jump_date: selectedDate
+        },
+        success: function(response) {
+            $('#tableBody').html(response);
+        },
+        error: function(xhr, status, error) {
+            alert('Failed to fetch records for selected date.');
         }
+    });
+}
+// ...existing code...
+
+// Function to handle call button click: store data in tv_dashboard, no sound
+function callPatient(pid) {
+    // Get patient name and status from the table row
+    const patientRow = document.querySelector(`#status-${pid}`).closest('tr');
+    const patientNameCell = patientRow.querySelector('td:nth-child(2)');
+    const roomCell = patientRow.querySelector('td:nth-child(3)');
+    const statusSelect = document.querySelector(`#status-${pid}`);
+
+    const patientName = patientNameCell ? patientNameCell.textContent.trim() : '';
+    const room = roomCell ? roomCell.textContent.trim() : '';
+    const status = statusSelect ? statusSelect.value : '';
+
+    // Send data to PHP to store in tv_dashboard
+    fetch('store_tv_dashboard.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `pid=${encodeURIComponent(pid)}&patient_name=${encodeURIComponent(patientName)}&room=${encodeURIComponent(room)}&status=${encodeURIComponent(status)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Patient added to TV Dashboard.');
+        } else {
+            alert('Failed to add patient to TV Dashboard: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(() => {
+        alert('An error occurred while adding patient to TV Dashboard.');
+    });
+}
 
         function searchRecords() {
             const searchBy = $('#searchBy').val();
@@ -1043,7 +1091,7 @@ include "header_section.php";
         </script>
 
         <?php // Close connection at the very end
-mysqli_close($conn); ?>
+        mysqli_close($conn); ?>
         </body>
 
 </html>
