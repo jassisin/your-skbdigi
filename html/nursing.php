@@ -1,22 +1,23 @@
+
 <?php
-    require 'session.php';
-    include 'connection.php';
+require 'session.php';
+include 'connection.php';
 
-    // Set page-specific variables
-    $page_title         = "Nursing";
-    $page_description   = "Edit page description";
-    $page_heading_color = "#6f42c1"; // Purple color
-    $footer_color       = "#f8f9fa"; // Light gray
+// Set page-specific variables
+$page_title = 'Nursing';
+$page_description = 'Edit page description';
+$page_heading_color = '#6f42c1';  // Purple color
+$footer_color = '#f8f9fa';  // Light gray
 
-    // Set username
-    if (isset($_SESSION['main_admin'])) {
-        $username = $_SESSION['main_admin'];
-    } else {
-        $username = 'Guest';
-    }
+// Set username
+if (isset($_SESSION['main_admin'])) {
+    $username = $_SESSION['main_admin'];
+} else {
+    $username = 'Guest';
+}
 
-    // Include header
-    include 'header_section.php';
+// Include header
+include 'header_section.php';
 ?>
 <html
   lang="en"
@@ -160,59 +161,78 @@
         }
 
         .patient-table-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #f8fafc;
+            border-radius: 18px;
+            box-shadow: 0 6px 24px rgba(79,70,229,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            border: 1.5px solid #e0e7ef;
             overflow: hidden;
-            overflow-x: auto;
-             max-height: 400px;     /* Set max height for vertical scroll */
-            overflow-y: auto;
-        }
-
-        .table-header {
-            padding: 20px 24px;
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #1e293b;
+            margin-bottom: 32px;
+            padding: 0 0 8px 0;
         }
 
         .patient-table {
             width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
+            border-collapse: separate;
+            border-spacing: 0;
+            min-width: 900px;
+            background: transparent;
         }
 
-        .patient-table th {
-            background: linear-gradient(135deg, #4f46e5, #7c3aed);
-            color: white;
-            padding: 16px 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 13px;
+        .patient-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+            color: #fff;
+            font-weight: 800;
+            font-size: 17px;
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 22px 18px 22px 18px;
+            border-bottom: 3.5px solid #ede9fe;
+            box-shadow: 0 4px 16px rgba(79,70,229,0.13);
+        }
+        .patient-table thead th:first-child {
+            border-top-left-radius: 16px;
+        }
+        .patient-table thead th:last-child {
+            border-top-right-radius: 16px;
+        }
+
+        .patient-table tbody tr {
+            background: #fff;
+            transition: box-shadow 0.2s, background 0.2s;
+        }
+
+        .patient-table tbody tr:hover {
+            background: #f3f4f6;
+            box-shadow: 0 2px 12px rgba(79,70,229,0.08);
         }
 
         .patient-table td {
-            padding: 16px 12px;
-            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 14px;
+            border-bottom: 1.5px solid #e5e7eb;
             vertical-align: middle;
+            font-size: 15px;
+            color: #22223b;
         }
 
-        .patient-table tr {
-            transition: all 0.2s ease;
+        .patient-table td input,
+        .patient-table td select {
+            font-size: 14px;
         }
 
-        .patient-table tr:hover {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            transform: scale(1.001);
+        .patient-table td:first-child,
+        .patient-table th:first-child {
+            border-top-left-radius: 12px;
+        }
+        .patient-table td:last-child,
+        .patient-table th:last-child {
+            border-top-right-radius: 12px;
+        }
+
+        .patient-table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         .status-dropdown {
@@ -804,53 +824,58 @@
                 </thead>
                 <tbody id="nursingTableBody">
                    <?php
-                       $today  = date('Y-m-d');
-                       $sql    = "SELECT PID, name, notes, status, created_date FROM nursing_table WHERE DATE(created_date) = '$today' OR next_visit_date = '$today'";
-                       $result = mysqli_query($conn, $sql);
-                       if ($result && mysqli_num_rows($result) > 0):
-                           while ($row = mysqli_fetch_assoc($result)):
-                               // Format time as HH:MM AM/PM
-                               $timeArrived = date('h:i A', strtotime($row['created_date']));
-                               $pid         = htmlspecialchars($row['PID']);
-                           ?>
-						    <tr>
-						        <td><strong><?php echo $pid ?></strong></td>
-						        <td><?php echo htmlspecialchars($row['name']) ?></td>
-						        <td><?php echo $timeArrived ?></td>
-						        <td>
-						            <input type="text" class="form-control" id="notes-<?php echo $pid ?>" value="">
-						        </td>
-						        <td>
-						            <input type="date" class="date-input" id="nextdate-<?php echo $pid ?>"
-						                   min="<?php echo date('Y-m-d') ?>"
-						                   title="Select next appointment date">
-						        </td>
-						        <td>
-						            <select class="status-dropdown" id="status-<?php echo $pid ?>">
-						                <option value="RECEPTION_ENTRY"						                                               				                                                <?php echo $row['status'] == 'RECEPTION_ENTRY' ? 'selected' : '' ?>>RECEPTION - ENTRY</option>
-						                <option value="NURSING_VITAL"						                                             				                                              <?php echo $row['status'] == 'NURSING_VITAL' ? 'selected' : '' ?>>NURSING - VITAL</option>
-						                <option value="MEDICAL"						                                       				                                        <?php echo $row['status'] == 'MEDICAL' ? 'selected' : '' ?>>MEDICAL</option>
-						                <option value="DENTAL"						                                      				                                       <?php echo $row['status'] == 'DENTAL' ? 'selected' : '' ?>>DENTAL</option>
-						                <option value="NURSING_CARE"						                                            				                                             <?php echo $row['status'] == 'NURSING_CARE' ? 'selected' : '' ?>>NURSING - CARE</option>
-						                <option value="PHARMACY"						                                        				                                         <?php echo $row['status'] == 'PHARMACY' ? 'selected' : '' ?>>PHARMACY</option>
-						                <option value="RECEPTION_BILL"						                                              				                                               <?php echo $row['status'] == 'RECEPTION_BILL' ? 'selected' : '' ?>>RECEPTION - BILL</option>
-						            </select>
-						        </td>
-						        <td>
-						            <div class="action-buttons">
-						                <button class="btn-icon btn-update" onclick="updatePatientStatus('<?php echo $pid ?>')" title="Update Status">
-						                    ✅
-						                </button>
-						                <button class="btn-icon btn-call" onclick="callPatient('<?php echo $pid ?>')" title="Call Patient">
-						                    📞
-						                </button>
-						            </div>
-						        </td>
-						    </tr>
-						<?php
-                                endwhile;
-                            else:
-                        ?>
+$today = date('Y-m-d');
+
+$sql = "SELECT PID, name, notes, status, created_date 
+        FROM nursing_table 
+        WHERE (DATE(created_date) = '$today' OR next_visit_date = '$today') 
+        AND (status = 'NURSING_VITAL' OR status = 'NURSING_CARE')";
+
+$result = mysqli_query($conn, $sql);
+if ($result && mysqli_num_rows($result) > 0):
+    while ($row = mysqli_fetch_assoc($result)):
+        // Format time as HH:MM AM/PM
+        $timeArrived = date('h:i A', strtotime($row['created_date']));
+        $pid = htmlspecialchars($row['PID']);
+        ?>
+                            <tr>
+                                <td><strong><?php echo $pid ?></strong></td>
+                                <td><?php echo htmlspecialchars($row['name']) ?></td>
+                                <td><?php echo $timeArrived ?></td>
+                                <td>
+                                    <input type="text" class="form-control" id="notes-<?php echo $pid ?>" value="">
+                                </td>
+                                <td>
+                                    <input type="date" class="date-input" id="nextdate-<?php echo $pid ?>"
+                                           min="<?php echo date('Y-m-d') ?>"
+                                           title="Select next appointment date">
+                                </td>
+                                <td>
+                                    <select class="status-dropdown" id="status-<?php echo $pid ?>">
+                                        <option value="RECEPTION_ENTRY"						                                               				                                                <?php echo $row['status'] == 'RECEPTION_ENTRY' ? 'selected' : '' ?>>RECEPTION - ENTRY</option>
+                                        <option value="NURSING_VITAL"						                                             				                                              <?php echo $row['status'] == 'NURSING_VITAL' ? 'selected' : '' ?>>NURSING - VITAL</option>
+                                        <option value="MEDICAL"						                                       				                                        <?php echo $row['status'] == 'MEDICAL' ? 'selected' : '' ?>>MEDICAL</option>
+                                        <option value="DENTAL"						                                      				                                       <?php echo $row['status'] == 'DENTAL' ? 'selected' : '' ?>>DENTAL</option>
+                                        <option value="NURSING_CARE"						                                            				                                             <?php echo $row['status'] == 'NURSING_CARE' ? 'selected' : '' ?>>NURSING - CARE</option>
+                                        <option value="PHARMACY"						                                        				                                         <?php echo $row['status'] == 'PHARMACY' ? 'selected' : '' ?>>PHARMACY</option>
+                                        <option value="RECEPTION_BILL"						                                              				                                               <?php echo $row['status'] == 'RECEPTION_BILL' ? 'selected' : '' ?>>RECEPTION - BILL</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="btn-icon btn-update" onclick="updatePatientStatus('<?php echo $pid ?>')" title="Update Status">
+                                            ✅
+                                        </button>
+                                        <button class="btn-icon btn-call" onclick="callPatient('<?php echo $pid ?>')" title="Call Patient">
+                                            📞
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php
+    endwhile;
+else:
+    ?>
     <tr>
         <td colspan="7" class="text-center">No nursing patients found.</td>
     </tr>
@@ -991,28 +1016,34 @@ function callPatient(pid) {
       // Get patient name and status from the table row
     const patientRow = document.querySelector(`#status-${pid}`).closest('tr');
     const patientNameCell = patientRow.querySelector('td:nth-child(2)');
-    const roomCell = patientRow.querySelector('td:nth-child(3)');
     const statusSelect = document.querySelector(`#status-${pid}`);
 
     const patientName = patientNameCell ? patientNameCell.textContent.trim() : '';
-    const room = roomCell ? roomCell.textContent.trim() : '';
     const status = statusSelect ? statusSelect.value : '';
 
+    console.log('Calling patient:', {pid, patientName, status});
+
     // Send data to PHP to store in tv_dashboard
+    // Room will be determined by the backend based on status
     fetch('store_tv_dashboard.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `pid=${encodeURIComponent(pid)}&patient_name=${encodeURIComponent(patientName)}&room=${encodeURIComponent(room)}&status=${encodeURIComponent(status)}`
+        body: `pid=${encodeURIComponent(pid)}&patient_name=${encodeURIComponent(patientName)}&room=&status=${encodeURIComponent(status)}`
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             alert('Patient added to TV Dashboard.');
         } else {
             alert('Failed to add patient to TV Dashboard: ' + (data.error || 'Unknown error'));
         }
     })
-    .catch(() => {
+    .catch((error) => {
+        console.error('Error:', error);
         alert('An error occurred while adding patient to TV Dashboard.');
     });
 }
@@ -1126,6 +1157,6 @@ window.addEventListener('load', function() {
 </body>
 </html>
 <?php
-    // Include footer
+// Include footer
 include 'footer_section.php';
 ?>

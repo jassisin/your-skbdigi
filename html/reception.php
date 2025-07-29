@@ -1,3 +1,4 @@
+
 <?php
     require "session.php";
     require "connection.php";
@@ -112,11 +113,8 @@
     }
 
     #expenseTable thead {
-        position: sticky;
-        top: 0;
         background: #f8f9fa;
-        z-index: 10;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        /* Removed sticky header styles */
     }
 
     #expenseTable thead th {
@@ -576,77 +574,110 @@
         box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
     }
 
-    /* Patient Table */
+    /* Modern Patient Table Styles (like nursing) */
+    .patient-table-scroll {
+        overflow-x: auto;
+        overflow-y: auto;
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(79,70,229,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+        border: 1.5px solid #e0e7ef;
+        margin-bottom: 32px;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+    .patient-table-scroll::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    .patient-table-scroll::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 8px;
+    }
+    .patient-table-scroll::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
+    .patient-table-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+
     .patient-table-container {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: #f8fafc;
+        border-radius: 18px;
+        box-shadow: 0 6px 24px rgba(79,70,229,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+        border: 1.5px solid #e0e7ef;
         overflow: hidden;
-    }
-
-    .table-header {
-        padding: 20px 24px;
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-
-    .table-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #1e293b;
-    }
-
-    .appointment-count {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 600;
+        margin-bottom: 32px;
+        padding: 0 0 8px 0;
+        position: relative;
     }
 
     .patient-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: transparent;
     }
 
-    .patient-table th {
-        background: linear-gradient(135deg, #4f46e5, #7c3aed);
-        color: white;
-        padding: 16px 12px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 13px;
+    .patient-table thead th {
+        background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+        color: #fff;
+        font-weight: 800;
+        font-size: 17px;
+        letter-spacing: 1.2px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        padding: 22px 18px 22px 18px;
+        border-bottom: 3.5px solid #ede9fe;
+        box-shadow: 0 4px 16px rgba(79,70,229,0.13);
+    }
+    .patient-table thead th:first-child {
+        border-top-left-radius: 16px;
+    }
+    .patient-table thead th:last-child {
+        border-top-right-radius: 16px;
+    }
+
+    .patient-table tbody tr {
+        background: #fff;
+        transition: box-shadow 0.2s, background 0.2s;
+    }
+
+    .patient-table tbody tr:hover {
+        background: #f3f4f6;
+        box-shadow: 0 2px 12px rgba(79,70,229,0.08);
     }
 
     .patient-table td {
-        padding: 16px 12px;
-        border-bottom: 1px solid #e2e8f0;
+        padding: 16px 14px;
+        border-bottom: 1.5px solid #e5e7eb;
         vertical-align: middle;
+        font-size: 15px;
+        color: #22223b;
     }
 
-    .patient-table tr {
-        transition: all 0.2s ease;
-        cursor: pointer;
+    .patient-table td input,
+    .patient-table td select {
+        font-size: 14px;
     }
 
-    .patient-table tr:hover {
-        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-        transform: scale(1.001);
+    .patient-table td:first-child,
+    .patient-table th:first-child {
+        border-top-left-radius: 12px;
+        
+
+  min-width: 200px;
+  width: 220px;
+  max-width: 240px;
+
+    }
+    .patient-table td:last-child,
+    .patient-table th:last-child {
+        border-top-right-radius: 12px;
     }
 
-    .patient-table tr.selected {
-        background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-        box-shadow: inset 3px 0 0 #4f46e5;
+    .patient-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .status-badge {
@@ -695,9 +726,31 @@
 
     .action-buttons {
         display: flex;
-        gap: 8px;
+        gap: 16px;
         align-items: center;
     }
+
+    .btn-action-lg {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-size: 16px;
+        background: #fff;
+        border: none;
+        transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.10);
+        cursor: pointer;
+        padding: 0;
+    }
+    .btn-action-lg:hover {
+        background: #f3f4f6;
+        transform: scale(1.10);
+        box-shadow: 0 4px 16px rgba(79, 70, 229, 0.18);
+    }
+
 
     .btn-sm {
         padding: 8px 12px;
@@ -717,13 +770,26 @@
     }
 
     .btn-call {
-        background: #10b981;
-        color: white;
+        background: linear-gradient(135deg, #4f46e5 60%, #7c3aed 100%);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.10);
+        transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+        position: relative;
     }
 
     .btn-call:hover {
-        background: #059669;
-        transform: scale(1.1);
+        background: linear-gradient(135deg, #7c3aed 60%, #4f46e5 100%);
+        color: #fff;
+        transform: scale(1.10);
+        box-shadow: 0 4px 16px rgba(79, 70, 229, 0.18);
     }
 
     .empty-state {
@@ -845,135 +911,103 @@
 
                     <!-- Add space between search and table -->
                     <div style="height: 18px;"></div>
-                    <div class="expense-table-scroll">
-                        <table class="table table-bordered" id="expenseTable">
-                            <thead>
-                                <tr>
-                                    <th>Edit</th>
-                                    <th>Call</th>
-                                    <th>PID</th>
-                                    <th>Name</th>
-                                    <th>Status</th>
-                                    <th>Nationality</th>
-                                    <th>Phone</th>
-                                    <th>Whatsapp</th>
-                                    <th>Area</th>
-                                    <th>Residence</th>
-                                    <th>Camp Boss</th>
-                                    <th>Hr Staff</th>
-                                    <th>Phone (HR)</th>
-                                    <th>Company</th>
-                                    <th>Referral</th>
-                                    <th>Gate Service Site</th>
-                                    <th>Notes</th>
-                                    <th>Delete</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <?php // If search is performed, fetch filtered results
-                                    if (
-                                        $_SERVER["REQUEST_METHOD"] === "POST" &&
-                                        isset($_POST["searchBy"]) &&
-                                        isset($_POST["searchValue"])
-                                    ) {
-                                        $searchBy    = mysqli_real_escape_string($conn, $_POST["searchBy"]);
-                                        $searchValue = mysqli_real_escape_string($conn, $_POST["searchValue"]);
+                    <div class="patient-table-scroll" style="overflow-x: auto; overflow-y: auto; min-width: 100%;">
+  <div class="patient-table-container" style="min-width: 100%;">
+    <table class="patient-table" style="min-width:1200px;">
+      <thead>
+        <tr>
+          <th>Action</th>
+          <th>PID</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Nationality</th>
+          <th>Phone</th>
+          <th>Whatsapp</th>
+          <th>Area</th>
+          <th>Residence</th>
+          <th>Camp Boss</th>
+          <th>Hr Staff</th>
+          <th>Phone (HR)</th>
+          <th>Company</th>
+          <th>Referral</th>
+          <th>Gate Service Site</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+    </table>
+    <div style="height: 440px; overflow-y: auto; overflow-x: auto; width: 100%;">
+      <table class="patient-table" style="min-width:1200px;">
+        <tbody id="tableBody">
+        <?php // If search is performed, fetch filtered results
+            if (
+                $_SERVER["REQUEST_METHOD"] === "POST" &&
+                isset($_POST["searchBy"]) &&
+                isset($_POST["searchValue"])
+            ) {
+                $searchBy    = mysqli_real_escape_string($conn, $_POST["searchBy"]);
+                $searchValue = mysqli_real_escape_string($conn, $_POST["searchValue"]);
 
-                                        if ($searchBy === "name") {
-                                            $sql = "SELECT * FROM reception WHERE name LIKE '%$searchValue%'";
-                                        } elseif ($searchBy === "status") {
-                                            $sql = "SELECT * FROM reception WHERE status = '$searchValue'";
-                                        } else {
-                                            $sql = "SELECT * FROM reception"; // Default to all records
-                                        }
+                if ($searchBy === "name") {
+                    $sql = "SELECT * FROM reception WHERE name LIKE '%$searchValue%'";
+                } elseif ($searchBy === "status") {
+                    $sql = "SELECT * FROM reception WHERE status = '$searchValue'";
+                } else {
+                    $sql = "SELECT * FROM reception"; // Default to all records
+                }
 
-                                        $result = mysqli_query($conn, $sql);
-                                    } else {
-                                        // Use the initial query for all records
-                                        $result = mysqli_query($conn, $sql);
-                                }?>
+                $result = mysqli_query($conn, $sql);
+            } else {
+                // Use the initial query for all records
+                $result = mysqli_query($conn, $sql);
+        }?>
 <?php if (mysqli_num_rows($result) > 0): ?>
 <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                <tr>
-                                    <td>
-                                        <a href="edit_patient.php?id=<?php echo $row[
-                                                                         "id"
-                                                                     ]; ?>" title="Edit">
-                                            <i class="mdi mdi-pencil" style="font-size:20px;color:#1976d2;"></i>
-                                        </a>
-                                    </td>
-                                    <td>
-                                         <button class="btn-icon btn-call" onclick="callPatient('<?php echo $pid ?>')" title="Call Patient">
-						                    📞
-						                </button>
-                                    </td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["PID"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["name"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["status"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["nationality"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["phone"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["whatsapp"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["area"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["residence"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["camp_boss"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["hr_staff"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["hr_phone"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["company"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["refferal"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["gate_service_site"]
-                                        ); ?></td>
-                                    <td><?php echo htmlspecialchars(
-                                            $row["notes"]
-                                        ); ?></td>
-                                    <td>
-                                        <form method="post" action=""
-                                            onsubmit="return confirm('Are you sure you want to delete this patient?');"
-                                            style="display:inline;">
-                                            <input type="hidden" name="delete_id" value="<?php echo $row[
-                                                                                             "id"
-                                                                                         ]; ?>">
-                                            <button type="submit" name="delete" class="btn btn-link p-0" title="Delete">
-                                                <i class="mdi mdi-trash-can" style="font-size:20px;color:#d32f2f;"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
+        <tr>
+          <td>
+            <div class="action-buttons">
+              <a href="edit_patient.php?id=<?php echo $row["id"]; ?>" title="Edit" class="btn-action-lg" style="background: #e3eafe;">
+                <i class="mdi mdi-pencil" style="font-size:16px;color:#1976d2;"></i>
+              </a>
+              <button class="btn-icon btn-call" onclick="callPatient('<?php echo htmlspecialchars($row['PID'], ENT_QUOTES); ?>')" title="Call Patient">
+                <span style="font-size: 16px; display: flex; align-items: center; justify-content: center;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92V21a2 2 0 0 1-2.18 2A19.72 19.72 0 0 1 3 5.18 2 2 0 0 1 5 3h4.09a2 2 0 0 1 2 1.72c.13 1.13.37 2.23.72 3.28a2 2 0 0 1-.45 2.11l-1.27 1.27a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c1.05.35 2.15.59 3.28.72A2 2 0 0 1 22 16.92z"></path></svg>
+                </span>
+              </button>
+              <form method="post" action="" onsubmit="return confirm('Are you sure you want to delete this patient?');" style="display:inline;">
+                <input type="hidden" name="delete_id" value="<?php echo $row["id"]; ?>">
+                <button type="submit" name="delete" class="btn-action-lg" style="background: #fdeaea;" title="Delete">
+                  <i class="mdi mdi-trash-can" style="font-size:16px;color:#d32f2f;"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+          <td><?php echo htmlspecialchars($row["PID"]); ?></td>
+          <td><?php echo htmlspecialchars($row["name"]); ?></td>
+          <td><?php echo htmlspecialchars($row["status"]); ?></td>
+          <td><?php echo htmlspecialchars($row["nationality"]); ?></td>
+          <td><?php echo htmlspecialchars($row["phone"]); ?></td>
+          <td><?php echo htmlspecialchars($row["whatsapp"]); ?></td>
+          <td><?php echo htmlspecialchars($row["area"]); ?></td>
+          <td><?php echo htmlspecialchars($row["residence"]); ?></td>
+          <td><?php echo htmlspecialchars($row["camp_boss"]); ?></td>
+          <td><?php echo htmlspecialchars($row["hr_staff"]); ?></td>
+          <td><?php echo htmlspecialchars($row["hr_phone"]); ?></td>
+          <td><?php echo htmlspecialchars($row["company"]); ?></td>
+          <td><?php echo htmlspecialchars($row["refferal"]); ?></td>
+          <td><?php echo htmlspecialchars($row["gate_service_site"]); ?></td>
+          <td><?php echo htmlspecialchars($row["notes"]); ?></td>
+        </tr>
+        <?php endwhile; ?>
 <?php else: ?>
-                                <tr>
-                                    <td colspan="17" class="text-center">No records found.</td>
-                                </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
+        <tr>
+          <td colspan="16" class="text-center">No records found.</td>
+        </tr>
+        <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
                 </div>
             </div>
         </div>
@@ -1020,35 +1054,62 @@
         }
     });
 }
-// ...existing code...
 
-// Function to handle call button click: store data in tv_dashboard, no sound
+// Function to handle call button click: store data in tv_dashboard
 function callPatient(pid) {
-    // Get patient name and status from the table row
-    const patientRow = document.querySelector(`#status-${pid}`).closest('tr');
-    const patientNameCell = patientRow.querySelector('td:nth-child(2)');
-    const roomCell = patientRow.querySelector('td:nth-child(3)');
-    const statusSelect = document.querySelector(`#status-${pid}`);
-
+    console.log('Call button clicked for PID:', pid);
+    
+    // Get patient name from the table row
+    let patientRow = null;
+    
+    // Try multiple methods to find the row
+    const allRows = document.querySelectorAll('tbody tr');
+    for (let row of allRows) {
+        const cells = row.querySelectorAll('td');
+        if (cells.length > 1 && cells[1].textContent.trim() === pid) {
+            patientRow = row;
+            break;
+        }
+    }
+    
+    if (!patientRow) {
+        console.error('Could not find patient row for PID:', pid);
+        alert('Error: Could not find patient data for PID ' + pid);
+        return;
+    }
+    
+    const patientNameCell = patientRow.querySelector('td:nth-child(3)'); // Name is 3rd column
     const patientName = patientNameCell ? patientNameCell.textContent.trim() : '';
-    const room = roomCell ? roomCell.textContent.trim() : '';
-    const status = statusSelect ? statusSelect.value : '';
+    const status = 'RECEPTION_ENTRY'; // Always RECEPTION_ENTRY for reception calls
+
+    console.log('Calling patient:', {pid, patientName, status});
+    
+    if (!patientName) {
+        alert('Error: Could not get patient name');
+        return;
+    }
 
     // Send data to PHP to store in tv_dashboard
+    // Room will be determined by the backend based on status
     fetch('store_tv_dashboard.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `pid=${encodeURIComponent(pid)}&patient_name=${encodeURIComponent(patientName)}&room=${encodeURIComponent(room)}&status=${encodeURIComponent(status)}`
+        body: `pid=${encodeURIComponent(pid)}&patient_name=${encodeURIComponent(patientName)}&room=&status=${encodeURIComponent(status)}`
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             alert('Patient added to TV Dashboard.');
         } else {
             alert('Failed to add patient to TV Dashboard: ' + (data.error || 'Unknown error'));
         }
     })
-    .catch(() => {
+    .catch((error) => {
+        console.error('Error:', error);
         alert('An error occurred while adding patient to TV Dashboard.');
     });
 }

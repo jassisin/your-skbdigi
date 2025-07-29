@@ -119,20 +119,24 @@
                 $stmt->execute();
                 $result = $stmt->get_result();
 
+                // Initialize next_visit_date as NULL for new records
+                $next_visit_date = null;
+
                 if ($result->num_rows > 0) {
-                   $status = ''; // Set status as empty
-                    // Update existing record
+                    // Update existing record - keep the original status from form
                     $updateQuery = "UPDATE $target_table SET name=?, status=?, next_visit_date=?, notes=? WHERE PID=?";
                     $stmt        = $conn->prepare($updateQuery);
                     $stmt->bind_param("sssss", $name, $status, $next_visit_date, $notes, $pid);
                 } else {
-                    // Insert new record
+                    // Insert new record with the status from form
                     $insertQuery = "INSERT INTO $target_table (PID, name, status, next_visit_date, notes, created_date) VALUES (?, ?, ?, ?, ?, ?)";
                     $stmt = $conn->prepare($insertQuery);
                     $stmt->bind_param("ssssss", $pid, $name, $status, $next_visit_date, $notes, $created_date);
                 }
 
-                $stmt->execute();
+                if (!$stmt->execute()) {
+                    error_log("Error updating $target_table: " . $stmt->error);
+                }
             }
 
             echo "<script>alert('Patient added successfully!'); window.location='reception.php';</script>";
@@ -157,19 +161,116 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Edit</title>
+    <title>Add Patient</title>
     <style>
-          .form-group {
-            margin-bottom: 15px;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fff;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        .form-container {
+            background: #f8fafc;
+            border-radius: 18px;
+            box-shadow: 0 6px 24px rgba(79,70,229,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            border: 1.5px solid #e0e7ef;
+            padding: 32px 28px 18px 28px;
+            margin-bottom: 32px;
+        }
+        .form-group {
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
         }
         .form-group label {
-            min-width: 150px; /* Adjust width as needed */
-            margin: 0; /* Reset margin for consistency */
+            min-width: 150px;
+            margin: 0;
+            font-weight: 500;
+            color: #4f46e5;
         }
-        .card {
-            margin-top: 20px;
+        .form-control, .form-select, textarea {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus, textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4f46e5;
+            border: 2px solid #e5e7eb;
+        }
+        .btn-secondary:hover {
+            background: white;
+            border-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .header-content { flex-direction: column; align-items: stretch; }
+            .form-container { padding: 16px 8px; }
+            .form-group label { min-width: 100px; font-size: 14px; }
         }
     </style>
     <meta name="description" content="" />
@@ -283,98 +384,89 @@
 
 
             <!-- Default -->
-<div class="container mt-5">
-    <div class="card">
-        <div class="card-header">
-            <h4 class="py-3 mb-4"><u>Add Patient Details</u></h4>
+<div class="container">
+    <!-- Section Header -->
+    <div class="section-header">
+        <div class="header-content">
+            <div>
+                <h1 class="section-title">Add Patient Details</h1>
+                <p class="section-subtitle">Enter new patient information</p>
+            </div>
         </div>
-        <div class="card-body">
-            <form action="add_patient.php" method="post">
-                <div class="form-group">
-                    <label for="name">Name:</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="nationality">Nationality:</label>
-                    <input type="text" class="form-control" id="nationality" name="nationality" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="phone">Phone:</label>
-                    <input type="text" class="form-control" id="phone" name="phone" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="whatsapp">Whatsapp:</label>
-                    <input type="text" class="form-control" id="whatsapp" name="whatsapp">
-                </div>
-
-                <div class="form-group">
-                    <label for="area">Area:</label>
-                    <input type="text" class="form-control" id="area" name="area" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="residence">Residence:</label>
-                    <input type="text" class="form-control" id="residence" name="residence" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="camp_boss">Camp Boss:</label>
-                    <input type="text" class="form-control" id="camp_boss" name="camp_boss">
-                </div>
-
-                <div class="form-group">
-                    <label for="hr_staff">HR Staff:</label>
-                    <input type="text" class="form-control" id="hr_staff" name="hr_staff">
-                </div>
-
-                <div class="form-group">
-                    <label for="company_phone">Company Phone:</label>
-                    <input type="text" class="form-control" id="company_phone" name="company_phone">
-                </div>
-
-                <div class="form-group">
-                    <label for="company">Company:</label>
-                    <input type="text" class="form-control" id="company" name="company" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="referral">Referral:</label>
-                    <input type="text" class="form-control" id="referral" name="referral">
-                </div>
-
-                <div class="form-group">
-                    <label for="gate_service_site">Gate Service Site:</label>
-                    <input type="text" class="form-control" id="gate_service_site" name="gate_service_site">
-                </div>
-
-                   <div class="form-group">
-                    <label for="status">Status:</label>
-                    <select class="form-control" id="status" name="status" required>
-                       <option value="">Select Status</option>
-                       <option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>
-                       <option value="NURSING_VITAL">NURSING - VITAL</option>
-                        <option value="MEDICAL">MEDICAL</option>
-                        <option value="DENTAL">DENTAL</option>
-                        <option value="NURSING_CARE">NURSING - CARE</option>
-                        <option value="PHARMACY">PHARMACY</option>
-                        <option value="RECEPTION_BILL">RECEPTION - BILL</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="notes">Notes:</label>
-                    <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
-                </div>
-
-                <div class="form-group justify-content-end">
-                    <button type="button" class="btn btn-secondary" onclick="autofillForm()">Autofill</button>
-                    <button type="submit" name="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
-        </div>
+    </div>
+    <!-- Form Container -->
+    <div class="form-container">
+        <form action="add_patient.php" method="post">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="nationality">Nationality:</label>
+                <input type="text" class="form-control" id="nationality" name="nationality" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="text" class="form-control" id="phone" name="phone" required>
+            </div>
+            <div class="form-group">
+                <label for="whatsapp">Whatsapp:</label>
+                <input type="text" class="form-control" id="whatsapp" name="whatsapp">
+            </div>
+            <div class="form-group">
+                <label for="area">Area:</label>
+                <input type="text" class="form-control" id="area" name="area" required>
+            </div>
+            <div class="form-group">
+                <label for="residence">Residence:</label>
+                <input type="text" class="form-control" id="residence" name="residence" required>
+            </div>
+            <div class="form-group">
+                <label for="camp_boss">Camp Boss:</label>
+                <input type="text" class="form-control" id="camp_boss" name="camp_boss">
+            </div>
+            <div class="form-group">
+                <label for="hr_staff">HR Staff:</label>
+                <input type="text" class="form-control" id="hr_staff" name="hr_staff">
+            </div>
+            <div class="form-group">
+                <label for="company_phone">Company Phone:</label>
+                <input type="text" class="form-control" id="company_phone" name="company_phone">
+            </div>
+            <div class="form-group">
+                <label for="company">Company:</label>
+                <input type="text" class="form-control" id="company" name="company" required>
+            </div>
+            <div class="form-group">
+                <label for="referral">Referral:</label>
+                <input type="text" class="form-control" id="referral" name="referral">
+            </div>
+            <div class="form-group">
+                <label for="gate_service_site">Gate Service Site:</label>
+                <input type="text" class="form-control" id="gate_service_site" name="gate_service_site">
+            </div>
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="">Select Status</option>
+                    <option value="RECEPTION_ENTRY">RECEPTION - ENTRY</option>
+                    <option value="NURSING_VITAL">NURSING - VITAL</option>
+                    <option value="MEDICAL">MEDICAL</option>
+                    <option value="DENTAL">DENTAL</option>
+                    <option value="NURSING_CARE">NURSING - CARE</option>
+                    <option value="PHARMACY">PHARMACY</option>
+                    <option value="RECEPTION_BILL">RECEPTION - BILL</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="notes">Notes:</label>
+                <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
+            </div>
+            <div class="form-group" style="justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="autofillForm()">Autofill</button>
+                <button type="submit" name="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
     </div>
 </div>
 

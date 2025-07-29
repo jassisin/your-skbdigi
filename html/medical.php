@@ -761,8 +761,6 @@
 
     <!-- Helpers -->
     <script src="../assets/vendor/js/helpers.js"></script>
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="../assets/js/config.js"></script>
   </head>
   <body>
@@ -802,7 +800,10 @@
                 <tbody id="nursingTableBody">
                    <?php
                      $today = date('Y-m-d');
-                       $sql    = "SELECT PID, name, notes, status, created_date FROM medical_table WHERE DATE(created_date) = '$today' OR next_visit_date = '$today'";
+                       $sql = "SELECT PID, name, notes, status, created_date 
+                               FROM medical_table 
+                               WHERE (DATE(created_date) = '$today' OR next_visit_date = '$today') 
+                               AND status = 'MEDICAL'";
                        $result = mysqli_query($conn, $sql);
                        if ($result && mysqli_num_rows($result) > 0):
                            while ($row = mysqli_fetch_assoc($result)):

@@ -54,6 +54,98 @@ if (isset($_POST['submit'])) {
         notes='$notes'
         WHERE id=$id";
     if (mysqli_query($conn, $update_sql)) {
+        // Also update the corresponding department table based on status
+        $pid = $row['PID']; // Get the patient's PID
+        $old_status = $row['status']; // Get the previous status
+        
+        // Determine old and new target tables based on status
+        function getTargetTable($status) {
+            switch (strtoupper($status)) {
+                case 'DENTAL':
+                    return 'dental_table';
+                case 'MEDICAL':
+                    return 'medical_table';
+                case 'NURSING_VITAL':
+                case 'NURSING_CARE':
+                    return 'nursing_table';
+                case 'PHARMACY':
+                    return 'pharmacy_table';
+                default:
+                    return null; // For RECEPTION_ENTRY, RECEPTION_BILL, etc.
+            }
+        }
+        
+        $old_target_table = getTargetTable($old_status);
+        $new_target_table = getTargetTable($status);
+        
+        // If status changed and both old and new statuses have department tables
+        if ($old_target_table && $new_target_table && $old_target_table !== $new_target_table && $pid) {
+            // Update old department table to mark as completed/transferred
+            $updateOldQuery = "UPDATE $old_target_table SET status = 'TRANSFERRED', notes = CONCAT(IFNULL(notes, ''), ' - Transferred to " . strtoupper($status) . "') WHERE PID = ?";
+            $stmt = $conn->prepare($updateOldQuery);
+            $stmt->bind_param("s", $pid);
+            if (!$stmt->execute()) {
+                error_log("Error updating old table $old_target_table: " . $stmt->error);
+            }
+        }
+        
+        // Handle new department table
+        if ($new_target_table && $pid) {
+            // Check if PID already exists in the new target table
+            $checkQuery = "SELECT id FROM $new_target_table WHERE PID = ?";
+            $stmt = $conn->prepare($checkQuery);
+            $stmt->bind_param("s", $pid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $next_visit_date = null;
+            $updated_date = date('Y-m-d H:i:s');
+            
+            if ($result->num_rows > 0) {
+                // Update existing record in new table
+                $updateQuery = "UPDATE $new_target_table SET name=?, status=?, notes=? WHERE PID=?";
+                $stmt = $conn->prepare($updateQuery);
+                $stmt->bind_param("ssss", $name, $status, $notes, $pid);
+            } else {
+                // Insert new record in new table
+                $insertQuery = "INSERT INTO $new_target_table (PID, name, status, next_visit_date, notes, created_date) VALUES (?, ?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($insertQuery);
+                $stmt->bind_param("ssssss", $pid, $name, $status, $next_visit_date, $notes, $updated_date);
+            }
+            
+            if (!$stmt->execute()) {
+                error_log("Error updating $new_target_table: " . $stmt->error);
+            }
+        }
+        // If status didn't change but is still a department status, just update the current table
+        else if ($new_target_table && $pid && (!$old_target_table || $old_target_table === $new_target_table)) {
+            // Check if PID already exists in the target table
+            $checkQuery = "SELECT id FROM $new_target_table WHERE PID = ?";
+            $stmt = $conn->prepare($checkQuery);
+            $stmt->bind_param("s", $pid);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $next_visit_date = null;
+            $updated_date = date('Y-m-d H:i:s');
+            
+            if ($result->num_rows > 0) {
+                // Update existing record
+                $updateQuery = "UPDATE $new_target_table SET name=?, status=?, notes=? WHERE PID=?";
+                $stmt = $conn->prepare($updateQuery);
+                $stmt->bind_param("ssss", $name, $status, $notes, $pid);
+            } else {
+                // Insert new record
+                $insertQuery = "INSERT INTO $new_target_table (PID, name, status, next_visit_date, notes, created_date) VALUES (?, ?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($insertQuery);
+                $stmt->bind_param("ssssss", $pid, $name, $status, $next_visit_date, $notes, $updated_date);
+            }
+            
+            if (!$stmt->execute()) {
+                error_log("Error updating $new_target_table: " . $stmt->error);
+            }
+        }
+        
         echo "<script>alert('Patient updated successfully!'); window.location='reception.php';</script>";
         exit;
     } else {
@@ -133,17 +225,114 @@ if (isset($_POST['submit'])) {
 
     <title>Update Patient Info</title>
     <style>
-          .form-group {
-            margin-bottom: 15px;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fff;
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .section-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .section-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-bottom: 8px;
+        }
+        .section-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+        .form-container {
+            background: #f8fafc;
+            border-radius: 18px;
+            box-shadow: 0 6px 24px rgba(79,70,229,0.08), 0 1.5px 4px rgba(0,0,0,0.04);
+            border: 1.5px solid #e0e7ef;
+            padding: 32px 28px 18px 28px;
+            margin-bottom: 32px;
+        }
+        .form-group {
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
         }
         .form-group label {
-            min-width: 150px; /* Adjust width as needed */
-            margin: 0; /* Reset margin for consistency */
+            min-width: 150px;
+            margin: 0;
+            font-weight: 500;
+            color: #4f46e5;
         }
-        .card {
-            margin-top: 20px;
+        .form-control, .form-select {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 16px rgba(79, 70, 229, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4f46e5;
+            border: 2px solid #e5e7eb;
+        }
+        .btn-secondary:hover {
+            background: white;
+            border-color: #4f46e5;
+            transform: translateY(-1px);
+        }
+        @media (max-width: 768px) {
+            .container { padding: 12px; }
+            .header-content { flex-direction: column; align-items: stretch; }
+            .form-container { padding: 16px 8px; }
+            .form-group label { min-width: 100px; font-size: 14px; }
         }
     </style>
     <meta name="description" content="" />
@@ -259,85 +448,94 @@ if (isset($_POST['submit'])) {
             <!-- Default -->
          
 
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-body">
-     <h4 class="py-3 mb-4"><u>Update Patient Details</u></h4>
-    <form method="post">
-        <div class="form-group mb-2">
-            <label>Name:</label>
-            <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($row['name']); ?>" required>
+<div class="container">
+    <!-- Section Header -->
+    <div class="section-header">
+        <div class="header-content">
+            <div>
+                <h1 class="section-title">Update Patient Details</h1>
+                <p class="section-subtitle">Edit and update patient information</p>
+            </div>
         </div>
-        <div class="form-group mb-2">
-            <label>Nationality:</label>
-            <input type="text" name="nationality" class="form-control" value="<?php echo htmlspecialchars($row['nationality']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Phone:</label>
-            <input type="text" name="phone" class="form-control" value="<?php echo htmlspecialchars($row['phone']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Whatsapp:</label>
-            <input type="text" name="whatsapp" class="form-control" value="<?php echo htmlspecialchars($row['whatsapp']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Area:</label>
-            <input type="text" name="area" class="form-control" value="<?php echo htmlspecialchars($row['area']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Residence:</label>
-            <input type="text" name="residence" class="form-control" value="<?php echo htmlspecialchars($row['residence']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Camp Boss:</label>
-            <input type="text" name="camp_boss" class="form-control" value="<?php echo htmlspecialchars($row['camp_boss']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Hr Staff:</label>
-            <input type="text" name="hr_staff" class="form-control" value="<?php echo htmlspecialchars($row['hr_staff']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Phone (HR):</label>
-            <input type="text" name="hr_phone" class="form-control" value="<?php echo htmlspecialchars($row['hr_phone']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Company:</label>
-            <input type="text" name="company" class="form-control" value="<?php echo htmlspecialchars($row['company']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Referral:</label>
-            <input type="text" name="refferal" class="form-control" value="<?php echo htmlspecialchars($row['refferal']); ?>">
-        </div>
-        <div class="form-group mb-2">
-            <label>Gate Service Site:</label>
-            <input type="text" name="gate_service_site" class="form-control" value="<?php echo htmlspecialchars($row['gate_service_site']); ?>">
-        </div>
-        <div class="form-group mb-2">
-              <label>Next Visit Date:</label>
-             <input type="date" name="next_visit_date" class="form-control" value="<?php echo htmlspecialchars($row['next_visit_date'] ?? ''); ?>">
-        </div>
-        <div class="form-group mb-2">
-    <label>Status:</label>
-    <select name="status" id="status" class="form-select">
-        <option value="">Select Status</option>
-        <option value="NURSING" <?php if($row['status']=='NURSING') echo 'selected'; ?>>NURSING</option>
-        <option value="MEDICAL" <?php if($row['status']=='MEDICAL') echo 'selected'; ?>>MEDICAL</option>
-        <option value="DENTAL" <?php if($row['status']=='DENTAL') echo 'selected'; ?>>DENTAL</option>
-        <option value="RECEPTION 2" <?php if($row['status']=='RECEPTION 2') echo 'selected'; ?>>RECEPTION 2</option>
-        <option value="PHARMACY" <?php if($row['status']=='PHARMACY') echo 'selected'; ?>>PHARMACY</option>
-    </select>
-</div>
-        <div class="form-group mb-2">
-            <label>Notes:</label>
-            <input type="text" name="notes" class="form-control" value="<?php echo htmlspecialchars($row['notes']); ?>">
-        </div>
-       <div class="form-group mb-2 d-flex justify-content-end" style="gap:10px;">
-        <button type="submit" name="submit" class="btn btn-primary">Update</button>
-        <a href="reception.php" class="btn btn-secondary">Cancel</a>
-     </div>
- </form>
-</div>
-</div>
+    </div>
+    <!-- Form Container -->
+    <div class="form-container">
+        <form method="post">
+            <div class="form-group">
+                <label>Name:</label>
+                <input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($row['name']); ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Nationality:</label>
+                <input type="text" name="nationality" class="form-control" value="<?php echo htmlspecialchars($row['nationality']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Phone:</label>
+                <input type="text" name="phone" class="form-control" value="<?php echo htmlspecialchars($row['phone']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Whatsapp:</label>
+                <input type="text" name="whatsapp" class="form-control" value="<?php echo htmlspecialchars($row['whatsapp']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Area:</label>
+                <input type="text" name="area" class="form-control" value="<?php echo htmlspecialchars($row['area']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Residence:</label>
+                <input type="text" name="residence" class="form-control" value="<?php echo htmlspecialchars($row['residence']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Camp Boss:</label>
+                <input type="text" name="camp_boss" class="form-control" value="<?php echo htmlspecialchars($row['camp_boss']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Hr Staff:</label>
+                <input type="text" name="hr_staff" class="form-control" value="<?php echo htmlspecialchars($row['hr_staff']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Phone (HR):</label>
+                <input type="text" name="hr_phone" class="form-control" value="<?php echo htmlspecialchars($row['hr_phone']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Company:</label>
+                <input type="text" name="company" class="form-control" value="<?php echo htmlspecialchars($row['company']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Referral:</label>
+                <input type="text" name="refferal" class="form-control" value="<?php echo htmlspecialchars($row['refferal']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Gate Service Site:</label>
+                <input type="text" name="gate_service_site" class="form-control" value="<?php echo htmlspecialchars($row['gate_service_site']); ?>">
+            </div>
+            <div class="form-group">
+                <label>Next Visit Date:</label>
+                <input type="date" name="next_visit_date" class="form-control" value="<?php echo htmlspecialchars($row['next_visit_date'] ?? ''); ?>">
+            </div>
+            <div class="form-group">
+                <label>Status:</label>
+                <select name="status" id="status" class="form-select" required>
+                    <option value="">Select Status</option>
+                    <option value="RECEPTION_ENTRY" <?php if($row['status']=='RECEPTION_ENTRY') echo 'selected'; ?>>RECEPTION - ENTRY</option>
+                    <option value="NURSING_VITAL" <?php if($row['status']=='NURSING_VITAL') echo 'selected'; ?>>NURSING - VITAL</option>
+                    <option value="MEDICAL" <?php if($row['status']=='MEDICAL') echo 'selected'; ?>>MEDICAL</option>
+                    <option value="DENTAL" <?php if($row['status']=='DENTAL') echo 'selected'; ?>>DENTAL</option>
+                    <option value="NURSING_CARE" <?php if($row['status']=='NURSING_CARE') echo 'selected'; ?>>NURSING - CARE</option>
+                    <option value="PHARMACY" <?php if($row['status']=='PHARMACY') echo 'selected'; ?>>PHARMACY</option>
+                    <option value="RECEPTION_BILL" <?php if($row['status']=='RECEPTION_BILL') echo 'selected'; ?>>RECEPTION - BILL</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Notes:</label>
+                <input type="text" name="notes" class="form-control" value="<?php echo htmlspecialchars($row['notes']); ?>">
+            </div>
+            <div class="form-group" style="justify-content: flex-end; gap: 10px;">
+                <button type="submit" name="submit" class="btn btn-primary">Update</button>
+                <a href="reception.php" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
             <!-- Footer -->
             <footer class="content-footer footer bg-footer-theme">

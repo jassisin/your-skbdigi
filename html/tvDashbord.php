@@ -1,3 +1,4 @@
+
 <?php
     require 'session.php';
     include 'connection.php';
@@ -167,12 +168,14 @@
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            width: 25%;
         }
 
         .patient-table td {
             padding: 16px 12px;
             border-bottom: 1px solid #e2e8f0;
             vertical-align: middle;
+            width: 25%;
         }
 
         .patient-table tr {
@@ -204,6 +207,11 @@
         .status-pharmacy {
             background: #d1fae5;
             color: #065f46;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
         }
 
         .no-patients {
@@ -270,28 +278,51 @@
             <table class="patient-table">
                 <thead>
                     <tr>
-                         <th>PID</th>
+                        <th>PID</th>
                         <th>Patient Name</th>
                         <th>Room</th>
                         <th>Status</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="patientTableBody">
                     <?php
                         // Fetch patients from database
-                        $sql    = "SELECT * FROM tv_dashboard ORDER BY created_date ASC";
-                        $result = mysqli_query($conn, $sql);
+                        // First check what timestamp column name exists
+                        $checkColumns = mysqli_query($conn, "SHOW COLUMNS FROM tv_dashboard");
+                        $timestampColumn = 'created_date'; // Default
+                        
+                        if ($checkColumns) {
+                            while ($col = mysqli_fetch_assoc($checkColumns)) {
+                                if ($col['Field'] == 'timestamp') {
+                                    $timestampColumn = 'timestamp';
+                                    break;
+                                } else if ($col['Field'] == 'created_date') {
+                                    $timestampColumn = 'created_date';
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        $sql = "SELECT * FROM tv_dashboard";
+                        try {
+                            // Try ordering by the determined timestamp column
+                            $sql .= " ORDER BY $timestampColumn ASC";
+                            $result = mysqli_query($conn, $sql);
+                        } catch (Exception $e) {
+                            // If ordering fails, just select without ordering
+                            error_log("TV Dashboard error: " . $e->getMessage());
+                            $sql = "SELECT * FROM tv_dashboard";
+                            $result = mysqli_query($conn, $sql);
+                        }
 
                         if ($result && mysqli_num_rows($result) > 0):
                             while ($row = mysqli_fetch_assoc($result)):
                                 $pid = isset($row['PID']) ? htmlspecialchars($row['PID']) : '';
                                 // Use 'patient_name' as per your table definition, fallback to empty string if not set
                                 $name = isset($row['patient_name']) ? htmlspecialchars($row['patient_name']) : '';
-                                // Room can be null or missing
-                                $room   = isset($row['room']) && $row['room'] ? htmlspecialchars($row['room']) : '';
+                                // Read room directly from table
+                                $room = isset($row['room']) ? htmlspecialchars($row['room']) : '';
                                 $status = isset($row['status']) ? htmlspecialchars($row['status']) : '';
-                        // ...existing code...
 
                                 // Determine status display and class
                                 $statusDisplay = '';
@@ -318,11 +349,11 @@
                                         $statusClass   = 'status-waiting';
                                 }
                             ?>
-		                            <tr>
-		                                <td><strong><?php echo $pid; ?></strong></td>
-		                                <td><?php echo $name; ?></td>
-		                                <td><?php echo $room; ?></td>
-		                               <td>
+                                    <tr>
+                                        <td><strong><?php echo $pid; ?></strong></td>
+                                        <td><?php echo $name; ?></td>
+                                        <td><?php echo $room; ?></td>
+                                       <td>
              <span class="patient-status <?php echo $statusClass; ?>">
             <?php
                 // Show user-friendly status label
@@ -338,19 +369,15 @@
                 }
             ?>
         </span>
-        </td>	                                                                <?php echo $statusClass; ?>"><?php echo $statusDisplay; ?></span></td>
-		                                 <td>
-		                                    <button class="btn btn-primary" style="padding:6px 16px;font-size:13px;" title="Announce">
-		                                        <span style="font-size:1.3em;">🔊</span>
-		                                    </button>
-		                                </td>
-		                            </tr>
-		                            <?php
+        </td>
+                                
+                                    </tr>
+                                    <?php
                                             endwhile;
                                         else:
                                     ?>
                     <tr>
-                        <td colspan="3" class="no-patients">
+                        <td colspan="4" class="no-patients">
                             <div class="no-patients-icon">😊</div>
                             <div>No patients in queue</div>
                         </td>
@@ -372,18 +399,84 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
+        
+        // Function to announce patient using speech synthesis
+        function announcePatient(pid, name, status) {
+            if ('speechSynthesis' in window) {
+                // Create announcement message based on status
+                let destination = '';
+                switch (status) {
+                    case 'NURSING_VITAL': destination = 'Nursing for vital signs'; break;
+                    case 'MEDICAL': destination = 'Medical consultation'; break;
+                    case 'DENTAL': destination = 'Dental consultation'; break;
+                    case 'NURSING_CARE': destination = 'Nursing care'; break;
+                    case 'PHARMACY': destination = 'Pharmacy'; break;
+                    case 'RECEPTION_BILL': destination = 'Reception for billing'; break;
+                    default: destination = 'Reception'; break;
+                }
+                
+                // Format the announcement
+                const message = `Patient ${name} with ID ${pid}, please proceed to ${destination}`;
+                
+                // Create utterance and set properties
+                const utterance = new SpeechSynthesisUtterance(message);
+                utterance.rate = 0.9;  // Slightly slower rate for clarity
+                utterance.pitch = 1.0;
+                utterance.volume = 1.0;
+                
+                // Cancel any current speech and speak the new announcement
+                speechSynthesis.cancel();
+                speechSynthesis.speak(utterance);
+                
+                // Visual feedback that announcement was made
+                const button = event.currentTarget;
+                button.classList.add('btn-success');
+                button.disabled = true;
+                
+                setTimeout(() => {
+                    button.classList.remove('btn-success');
+                    button.disabled = false;
+                }, 3000);
+            } else {
+                alert('Speech synthesis is not supported in your browser.');
+            }
+        }
+        
         // Auto-refresh patient table every 30 seconds
         function refreshPatientTable() {
-            fetch(window.location.href)
-                .then(response => response.text())
-                .then(html => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const newTableBody = doc.getElementById('patientTableBody');
+            fetch('fetch_tv_dashboard.php')
+                .then(response => response.json())
+                .then(data => {
                     const currentTableBody = document.getElementById('patientTableBody');
-
-                    if (newTableBody && currentTableBody) {
-                        currentTableBody.innerHTML = newTableBody.innerHTML;
+                    if (currentTableBody && Array.isArray(data.patients)) {
+                        let html = '';
+                        data.patients.forEach(patient => {
+                            // Display status labels properly
+                            let statusDisplay = '';
+                            switch (patient.status) {
+                                case 'RECEPTION_ENTRY':  statusDisplay = 'RECEPTION - ENTRY'; break;
+                                case 'NURSING_VITAL':    statusDisplay = 'NURSING - VITAL'; break;
+                                case 'MEDICAL':          statusDisplay = 'MEDICAL'; break;
+                                case 'DENTAL':           statusDisplay = 'DENTAL'; break;
+                                case 'NURSING_CARE':     statusDisplay = 'NURSING - CARE'; break;
+                                case 'PHARMACY':         statusDisplay = 'PHARMACY'; break;
+                                case 'RECEPTION_BILL':   statusDisplay = 'RECEPTION - BILL'; break;
+                                default:                 statusDisplay = patient.status; break;
+                            }
+                            
+                            html += `<tr><td><strong>${patient.PID}</strong></td><td>${patient.patient_name}</td><td>${patient.room}</td><td><span class='patient-status'>${statusDisplay}</span></td></tr>`;
+                            // Check if patient hasn't been announced yet
+                            if (patient.isAnnounced == 0) {
+                                announcePatientMulti(patient.PID, patient.patient_name, patient.room);
+                                // Update isAnnounced in backend
+                                fetch('update_announce.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: `id=${encodeURIComponent(patient.id)}`
+                                });
+                            }
+                        });
+                        currentTableBody.innerHTML = html;
                     }
                 })
                 .catch(error => {
@@ -391,9 +484,34 @@
                 });
         }
 
+        // Announce in both English and Hindi
+        function announcePatientMulti(pid, name, room) {
+            if ('speechSynthesis' in window) {
+                // English announcement
+                let engMsg = `Patient ${name} with ID ${pid}, please proceed to ${room}`;
+                // Hindi announcement (simple translation)
+                let hindiMsg = `मरीज ${name} आईडी ${pid}, कृपया ${room} पर जाएं`;
+                let utterEng = new SpeechSynthesisUtterance(engMsg);
+                utterEng.lang = 'en-US';
+                utterEng.rate = 0.9;
+                utterEng.pitch = 1.0;
+                utterEng.volume = 1.0;
+                let utterHindi = new SpeechSynthesisUtterance(hindiMsg);
+                utterHindi.lang = 'hi-IN';
+                utterHindi.rate = 0.9;
+                utterHindi.pitch = 1.0;
+                utterHindi.volume = 1.0;
+                speechSynthesis.cancel();
+                speechSynthesis.speak(utterEng);
+                setTimeout(() => {
+                    speechSynthesis.speak(utterHindi);
+                }, 2000);
+            }
+        }
+
         // Initialize auto-refresh
         document.addEventListener('DOMContentLoaded', function() {
-            setInterval(refreshPatientTable, 30000); // Refresh every 30 seconds
+            setInterval(refreshPatientTable, 5000); // Refresh every 5 seconds
         });
     </script>
 </body>

@@ -802,7 +802,10 @@
                 <tbody id="nursingTableBody">
                    <?php
                     $today = date('Y-m-d');
-                       $sql    = "SELECT PID, name, notes, status, created_date FROM dental_table WHERE DATE(created_date) = '$today' OR next_visit_date = '$today'";
+                       $sql = "SELECT PID, name, notes, status, created_date 
+                               FROM dental_table 
+                               WHERE (DATE(created_date) = '$today' OR next_visit_date = '$today') 
+                               AND status = 'DENTAL'";
                        $result = mysqli_query($conn, $sql);
                        if ($result && mysqli_num_rows($result) > 0):
                            while ($row = mysqli_fetch_assoc($result)):
