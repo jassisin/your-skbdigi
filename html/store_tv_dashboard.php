@@ -48,7 +48,7 @@ if ($pid && $patient_name) {
         
         if ($result->num_rows > 0) {
             // Record exists, update it
-            $stmt = $conn->prepare("UPDATE tv_dashboard SET patient_name = ?, room = ?, status = ?, created_date = NOW(), isAnnounced = 0 WHERE PID = ?");
+            $stmt = $conn->prepare("UPDATE tv_dashboard SET patient_name = ?, room = ?, status = ?, created_at = NOW(), created_date = NOW(), isAnnounced = 0 WHERE PID = ?");
             if (!$stmt) {
                 throw new Exception("Update prepare failed: " . $conn->error);
             }
@@ -60,7 +60,7 @@ if ($pid && $patient_name) {
             error_log("Updated existing record for PID: $pid");
         } else {
             // Record doesn't exist, insert new one
-            $stmt = $conn->prepare("INSERT INTO tv_dashboard (PID, patient_name, room, status, created_date, isAnnounced) VALUES (?, ?, ?, ?, NOW(), 0)");
+            $stmt = $conn->prepare("INSERT INTO tv_dashboard (PID, patient_name, room, status, created_at, created_date, isAnnounced) VALUES (?, ?, ?, ?, NOW(), NOW(), 0)");
             if (!$stmt) {
                 throw new Exception("Insert prepare failed: " . $conn->error);
             }

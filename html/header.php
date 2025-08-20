@@ -11,9 +11,18 @@ $page_heading = $page_settings['page_heading'];
 $page_heading_color = $page_settings['page_heading_color'];
 $footer_color = $page_settings['footer_color'];
 $logo_image = $page_settings['logo_image'];
-if (isset($_SESSION['role'])) {
-  $role = $_SESSION['role'];
+
+// Fallback logo if database value is empty or invalid
+if (empty($logo_image)) {
+    $logo_image = 'logo/logo.jpg'; // Default fallback
 }
+
+// Set role with proper fallback handling (no session handling in header)
+$role = 'guest'; // Default role
+// Note: Individual pages should handle their own sessions and set $role if needed
+
+// Compute a base URL for links to ensure they are always correct
+$base_url = rtrim(dirname($_SERVER['PHP_SELF']), '/\\') . '/';
 ?>
 
 <style>
@@ -244,11 +253,8 @@ body.menu-collapsed .dashboard-container {
 </style>
 
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-  <button id="sidebarCollapseBtn" class="layout-menu-toggle menu-link text-large" style="margin: 0.5rem 1rem;">
-  <i class="mdi mdi-chevron-double-left" id="collapseIcon"></i>
-</button>
   <div class="app-brand demo">
-    <a href="index.html" class="app-brand-link">
+    <a href="<?php echo $base_url; ?>index.html" class="app-brand-link">
       <img src="../assets/img/<?php echo $logo_image; ?>" alt="Logo" class="w-px-40 h-auto rounded-circle" />
       <span class="app-brand-text demo menu-text fw-semibold ms-2" style="color: <?php echo $page_heading_color; ?>;"><?php echo $page_heading; ?></span>
     </a>
@@ -271,49 +277,49 @@ body.menu-collapsed .dashboard-container {
       </a>
       <ul class="menu-sub collapse" id="tokenMenu">
         <li class="menu-item">
-          <a href="tvDashbord.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>tvDashbord.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-desk"></i>
             <div data-i18n="Without menu">TV Dashboard</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="reception.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>reception.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-desk"></i>
             <div data-i18n="Without menu">Reception</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="nursing.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>nursing.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-medical-bag"></i>
             <div data-i18n="Without menu">Nursing</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="medical.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>medical.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-stethoscope"></i>
             <div data-i18n="Without menu">Medical</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="dental.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>dental.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-tooth"></i>
             <div data-i18n="Without menu">Dental</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="pharmacy.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>pharmacy.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-pill"></i>
             <div data-i18n="Without menu">Pharmacy</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="marketing.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>marketing.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-bullhorn"></i>
             <div data-i18n="Without menu">Marketing</div>
           </a>
         </li>
         <li class="menu-item">
-          <a href="office.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>office.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-office-building"></i>
             <div data-i18n="Without menu">Office</div>
           </a>
@@ -329,7 +335,7 @@ body.menu-collapsed .dashboard-container {
       </a>
       <ul class="menu-sub collapse" id="pbbMenu">
         <li class="menu-item">
-          <a href="dashboard" class="menu-link">
+          <a href="<?php echo $base_url; ?>dashboard" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-view-dashboard"></i>
             <div data-i18n="Analytics">Dashboard</div>
           </a>
@@ -343,19 +349,19 @@ body.menu-collapsed .dashboard-container {
           </a>
           <ul class="menu-sub collapse" id="budgetMenu">
             <li class="menu-item">
-              <a href="forcast_expense.php" class="menu-link">
+              <a href="<?php echo $base_url; ?>forcast_expense.php" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-trending-up"></i>
                 <div data-i18n="Without menu">Forecast Expenses</div>
               </a>
             </li>
             <li class="menu-item">
-              <a href="expcategory.php" class="menu-link">
+              <a href="<?php echo $base_url; ?>expcategory.php" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-tag-multiple"></i>
                 <div data-i18n="Without menu">Categories</div>
               </a>
             </li>
             <li class="menu-item">
-              <a href="add-vendor.php" class="menu-link">
+              <a href="<?php echo $base_url; ?>add-vendor.php" class="menu-link">
                 <i class="menu-icon tf-icons mdi mdi-store"></i>
                 <div data-i18n="Without menu">Vendor Management</div>
               </a>
@@ -373,7 +379,7 @@ body.menu-collapsed .dashboard-container {
       </a>
       <ul class="menu-sub collapse" id="roleMenu">
         <li class="menu-item">
-          <a href="admin-details.php" class="menu-link">
+          <a href="<?php echo $base_url; ?>admin-details.php" class="menu-link">
             <i class="menu-icon tf-icons mdi mdi-account-cog"></i>
             <div data-i18n="Without menu">Manage Role</div>
           </a>
@@ -424,12 +430,12 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Set active menu item
-  const currentPage = window.location.pathname.split('/').pop();
+  const currentPage = window.location.href;
   const menuLinks = document.querySelectorAll('.menu-link[href]');
   
   menuLinks.forEach(link => {
-    const href = link.getAttribute('href');
-    if (href === currentPage || href.includes(currentPage)) {
+    const href = link.href;
+    if (href === currentPage) {
       link.classList.add('active');
       
       // Expand parent menus
@@ -439,9 +445,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const parentToggle = document.querySelector(`[data-bs-target="#${parentMenu.id}"]`);
         if (parentToggle) {
           parentToggle.setAttribute('aria-expanded', 'true');
+          parentToggle.classList.add('active'); // Also activate the parent toggle
+        }
+        // Find the li of the parent toggle to activate it too
+        const parentMenuItem = parentToggle ? parentToggle.closest('.menu-item') : null;
+        if(parentMenuItem) {
+            parentMenuItem.classList.add('active');
         }
         parentMenu = parentMenu.parentElement.closest('.menu-sub');
       }
+       const topLevelMenuItem = link.closest('.menu-item');
+       if(topLevelMenuItem) {
+           topLevelMenuItem.classList.add('active');
+       }
     }
   });
 });
@@ -478,4 +494,4 @@ window.addEventListener('resize', function() {
     overlay.style.display = 'none';
   }
 }); 
-</script>  
+</script>

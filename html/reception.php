@@ -1,7 +1,7 @@
-
 <?php
-    require "session.php";
-    require "connection.php";
+     require 'session.php';
+    include 'connection.php';
+    include 'header.php';
 
     if (isset($_SESSION["main_admin"])) {
         $username = $_SESSION["main_admin"];

@@ -1,7 +1,15 @@
 
 <?php
-    require 'session.php';
+    // Start session first
+    session_start();
+    
     include 'connection.php';
+
+    // Set page-specific variables
+    $page_title         = "TV Dashboard";
+    $page_description   = "TV Dashboard page description";
+    $page_heading_color = "#6f42c1"; // Purple color
+    $footer_color       = "#f8f9fa"; // Light gray
 
     // Set username
     if (isset($_SESSION['main_admin'])) {
@@ -10,12 +18,23 @@
         $username = 'Guest';
     }
 
+    // Set role for header.php (fallback to guest if not set)
+    $role = 'guest';
+    if (isset($_SESSION['role']) && !empty($_SESSION['role'])) {
+        $role = $_SESSION['role'];
+    }
+
     // Include header
     include 'header_section.php';
 ?>
 <!DOCTYPE html>
-<html lang="en" class="light-style layout-menu-fixed layout-compact" dir="ltr" data-theme="theme-default"
-    data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<html
+  lang="en"
+  class="light-style layout-menu-fixed layout-compact"
+  dir="ltr"
+  data-theme="theme-default"
+  data-assets-path="../assets/"
+  data-template="vertical-menu-template-free">
 
 <head>
     <meta charset="utf-8" />
@@ -54,13 +73,10 @@
             background: #fff;
             min-height: 100vh;
             color: #333;
-            padding: 20px;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
+            padding: 12px;
         }
 
         .section-header {
@@ -225,11 +241,6 @@
             margin-bottom: 16px;
             opacity: 0.5;
         }
- .header-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-        }
 
         .clock-box {
             background: linear-gradient(135deg, #f8fafc, #e0e7ff 80%);
@@ -259,7 +270,10 @@
 </head>
 
 <body>
-    <div class="container">
+<!-- Your page content goes here -->
+          <div class="content-wrapper">
+             <div class="container">
+
         <!-- Section Header -->
         <div class="section-header">
             <div class="header-content">
@@ -386,7 +400,7 @@
                 </tbody>
             </table>
         </div>
-    </div>
+</div>
 
     <script>
         // Clock function

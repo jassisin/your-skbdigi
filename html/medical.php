@@ -1088,6 +1088,16 @@ window.addEventListener('load', function() {
     }
 });
     </script>
+    
+    <!-- Desktop Notification System -->
+    <script src="js/notifications.js"></script>
+    <script>
+        // Additional medical-specific notification handling
+        function refreshPageData() {
+            // Refresh the medical patient data
+            location.reload();
+        }
+    </script>
 </body>
 </html>
 <?php

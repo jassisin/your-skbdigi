@@ -39,6 +39,10 @@ if (isset($_POST['submit'])) {
         if ($rows == 1) {
             $_SESSION['main_admin'] = $username; // Initialize Session
             $_SESSION['role'] = $role;
+            
+            // Regenerate session ID to prevent session fixation
+            session_regenerate_id(true);
+
             // Update the log_date
             $stmt_update = $connection_ref->prepare("UPDATE admin_log SET log_date=? WHERE username=?");
             if ($stmt_update === false) {
@@ -47,15 +51,18 @@ if (isset($_POST['submit'])) {
             $stmt_update->bind_param("ss", $date, $username);
             $stmt_update->execute();
 
+            // Ensure session is written before redirecting
+            session_write_close();
+
             if ($role == 'owner_admin') {
-                echo '<script> window.location.href = "admin-details.php"; </script>';
+                header("Location: admin-details.php");
                 exit();
             } elseif($role == 'executive') {
-                echo '<script> window.location.href = "quick-address.php"; </script>';
+                header("Location: quick-address.php");
                 exit();
             }
             else{
-                echo '<script> window.location.href = "dashboard"; </script>';
+                header("Location: dashboard");
                 exit();
             }
         } else {

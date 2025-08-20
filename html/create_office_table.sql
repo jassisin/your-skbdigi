@@ -1,0 +1,88 @@
+-- SQL Query to create the office table
+-- This table stores office staff and administrative work data
+
+CREATE TABLE IF NOT EXISTS `office` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `PID` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `age` int(3) DEFAULT NULL,
+  `status` varchar(100) NOT NULL DEFAULT 'RECEPTION_ENTRY',
+  `nationality` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `whatsapp` varchar(20) DEFAULT NULL,
+  `area` varchar(255) DEFAULT NULL,
+  `residence` varchar(255) DEFAULT NULL,
+  `camp_boss` varchar(255) DEFAULT NULL,
+  `hr_staff` varchar(255) DEFAULT NULL,
+  `hr_phone` varchar(20) DEFAULT NULL,
+  `company` varchar(255) DEFAULT NULL,
+  `refferal` varchar(255) DEFAULT NULL,
+  `gate_service_site` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `created_date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `next_visit_date` date DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `PID` (`PID`),
+  INDEX `idx_name` (`name`),
+  INDEX `idx_status` (`status`),
+  INDEX `idx_phone` (`phone`),
+  INDEX `idx_created_date` (`created_date`),
+  INDEX `idx_next_visit_date` (`next_visit_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert some sample data (optional)
+INSERT INTO `office` (
+  `PID`, 
+  `name`, 
+  `age`, 
+  `status`, 
+  `nationality`, 
+  `phone`, 
+  `whatsapp`, 
+  `area`, 
+  `residence`, 
+  `camp_boss`, 
+  `hr_staff`, 
+  `hr_phone`, 
+  `company`, 
+  `refferal`, 
+  `gate_service_site`, 
+  `notes`
+) VALUES 
+(
+  'OFF001', 
+  'John Smith', 
+  35, 
+  'OFFICE', 
+  'American', 
+  '+1234567890', 
+  '+1234567890', 
+  'Downtown', 
+  'Main Street Apartment', 
+  'Mike Johnson', 
+  'Sarah Williams', 
+  '+1987654321', 
+  'ABC Corporation', 
+  'HR Department', 
+  'Main Gate', 
+  'Administrative staff member'
+),
+(
+  'OFF002', 
+  'Ahmed Hassan', 
+  28, 
+  'OFFICE', 
+  'Egyptian', 
+  '+201234567890', 
+  '+201234567890', 
+  'City Center', 
+  'Al Noor Building', 
+  'Omar Ali', 
+  'Fatima Mohamed', 
+  '+201987654321', 
+  'XYZ Company', 
+  'Manager', 
+  'South Gate', 
+  'Office coordinator'
+);
